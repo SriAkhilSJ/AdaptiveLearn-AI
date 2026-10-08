@@ -30,6 +30,8 @@ adapt text, audio, visuals, and learning methods to different student needs.
 
 ## Getting started
 
+For the full first-time setup, see [Setup.md](Setup.md).
+
 ```bash
 npm install
 cp .env.example .env
