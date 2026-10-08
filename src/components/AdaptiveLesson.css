@@ -323,6 +323,12 @@
   }
 }
 
+.personalized-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
 @media (max-width: 560px) {
   .adaptive-screen {
     padding: 2rem 0.85rem;

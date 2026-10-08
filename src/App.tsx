@@ -5,15 +5,18 @@ import { AccessibilityProfile } from './components/AccessibilityProfile'
 import { Dashboard } from './components/Dashboard'
 import { UploadLesson } from './components/UploadLesson'
 import { AdaptiveLesson } from './components/AdaptiveLesson'
+import { PersonalizedLearning } from './components/PersonalizedLearning'
 import { loadProfile } from './lib/profile'
-import type { UploadedLesson } from './lib/adaptive'
+import type { LessonAdaptations, UploadedLesson } from './lib/adaptive'
 import './App.css'
 
-type View = 'landing' | 'profile' | 'dashboard' | 'upload' | 'adaptation'
+type View = 'landing' | 'profile' | 'dashboard' | 'upload' | 'adaptation' | 'personalized'
 
 function App() {
   const [view, setView] = useState<View>('landing')
   const [uploadedLesson, setUploadedLesson] = useState<UploadedLesson | null>(null)
+  const [generatedAdaptations, setGeneratedAdaptations] =
+    useState<LessonAdaptations | null>(null)
 
   // Read on each render so the landing screen reflects the latest saved state.
   const savedProfile = loadProfile()
@@ -32,7 +35,10 @@ function App() {
       {view === 'profile' && (
         <AccessibilityProfile
           onBack={() => setView('landing')}
-          onContinue={() => setView('dashboard')}
+          onContinue={() => {
+            setGeneratedAdaptations(null)
+            setView('dashboard')
+          }}
         />
       )}
       {view === 'dashboard' && (
@@ -49,6 +55,7 @@ function App() {
           onBack={() => setView('dashboard')}
           onContinue={(lesson) => {
             setUploadedLesson(lesson)
+            setGeneratedAdaptations(null)
             setView('adaptation')
           }}
         />
@@ -56,7 +63,19 @@ function App() {
       {view === 'adaptation' && uploadedLesson && (
         <AdaptiveLesson
           lesson={uploadedLesson}
+          initialAdaptations={generatedAdaptations}
           onBack={() => setView('dashboard')}
+          onContinueToPersonalized={(adaptations) => {
+            setGeneratedAdaptations(adaptations)
+            setView('personalized')
+          }}
+        />
+      )}
+      {view === 'personalized' && uploadedLesson && generatedAdaptations && (
+        <PersonalizedLearning
+          lesson={uploadedLesson}
+          adaptations={generatedAdaptations}
+          onBack={() => setView('adaptation')}
         />
       )}
     </>

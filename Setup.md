@@ -73,8 +73,9 @@ A configured server responds with `"aiConfigured":true`. If it is `false`, check
 3. Browse for or drag in a PDF, then select **Continue** to extract its text.
 4. After the upload succeeds, select **Continue** to open the adaptation screen.
 5. Review **Original Lesson → AI Adaptation → Personalized Lesson**, then select **Generate adaptations**.
+6. Select **Start Personalized Learning**. Switch among **Easy Text**, **Step-by-Step**, **Visual**, and **Audio**. Use **Listen** for browser speech, **Explain More Simply** for easy text, **Show Visual** for the visual format, or **Explain Again** to hear the step-by-step version.
 
-The engine returns standard, easy-to-read, step-by-step, visual, and audio-ready explanations, plus a personalized lesson based on the saved preferences. The visual version is a text-based diagram/layout; the audio-ready version is prepared for reading aloud but does not include audio playback.
+The engine returns standard, easy-to-read, step-by-step, visual, and audio-ready explanations, plus a personalized lesson based on the saved preferences. The visual version is a text-based diagram/layout. The Listen button uses the browser's Web Speech API; available voices depend on the browser and device. If speech synthesis is unsupported, the lesson remains available to read on screen.
 
 PDF text and saved learning preferences are sent to the configured AI provider only after the student chooses **Generate adaptations**. PDF text extraction happens locally in the browser. Scanned/image-only PDFs are not OCR'd.
 
@@ -121,4 +122,4 @@ When asked to set up or verify this repository, the agent should:
 
 ### Ready-to-use Desktop Agent request
 
-> Clone the `arena/d3183c99-adaptivelearn-ai` branch from `https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git`, read `Setup.md`, and handle first-time setup end-to-end. Install dependencies; run `npm test`, `npm run lint`, and `npm run build`; start the app; and verify the frontend, `/api/health`, the PDF upload/extraction flow, and the Original Lesson → AI Adaptation → Personalized Lesson flow using a small text-based test PDF. Check that the saved learning preferences reach the adaptation service. Do not ask me to paste credentials. If no private `AI_API_KEY` is already configured, do not make a live provider request; use the existing mock-based tests and tell me live generation needs a private local key. Never expose or commit `.env`.
+> Clone the `arena/d3183c99-adaptivelearn-ai` branch from `https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git`, read `Setup.md`, and handle first-time setup end-to-end. Install dependencies; run `npm test`, `npm run lint`, and `npm run build`; start the app; and verify the frontend, `/api/health`, the PDF upload/extraction flow, and the Original Lesson → AI Adaptation → Personalized Learning flow using a small text-based test PDF. Check that saved preferences reach the adaptation service, the four format controls work, and Listen/Explain Again use browser speech or show the supported fallback. Do not ask me to paste credentials. If no private `AI_API_KEY` is already configured, do not make a live provider request; use the existing mock-based tests and tell me live generation needs a private local key. Never expose or commit `.env`.

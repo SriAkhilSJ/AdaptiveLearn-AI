@@ -3,6 +3,7 @@ import {
   AlertCircle,
   ArrowDown,
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   CheckCircle2,
   Headphones,
@@ -26,7 +27,9 @@ import './AdaptiveLesson.css'
 
 interface AdaptiveLessonProps {
   lesson: UploadedLesson
+  initialAdaptations?: LessonAdaptations | null
   onBack: () => void
+  onContinueToPersonalized: (adaptations: LessonAdaptations) => void
 }
 
 function formatFileSize(bytes: number): string {
@@ -58,9 +61,14 @@ function SelectedPreferences({ profile }: { profile: AccessibilityProfile }) {
   )
 }
 
-export function AdaptiveLesson({ lesson, onBack }: AdaptiveLessonProps) {
+export function AdaptiveLesson({
+  lesson,
+  initialAdaptations = null,
+  onBack,
+  onContinueToPersonalized,
+}: AdaptiveLessonProps) {
   const [profile] = useState<AccessibilityProfile>(loadProfile)
-  const [adaptations, setAdaptations] = useState<LessonAdaptations | null>(null)
+  const [adaptations, setAdaptations] = useState<LessonAdaptations | null>(initialAdaptations)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -117,9 +125,7 @@ export function AdaptiveLesson({ lesson, onBack }: AdaptiveLessonProps) {
             </span>
             <div>
               <p className="stage-label">Step 1</p>
-              <h2 id="original-heading" className="section-title">
-                Original Lesson
-              </h2>
+              <h2 id="original-heading" className="section-title">Original Lesson</h2>
             </div>
           </div>
           <p className="original-file-name">{lesson.name}</p>
@@ -132,7 +138,9 @@ export function AdaptiveLesson({ lesson, onBack }: AdaptiveLessonProps) {
             <summary>{hasMoreSource ? 'Preview extracted text' : 'View extracted text'}</summary>
             <pre>
               {preview}
-              {hasMoreSource ? '\n\n… Preview shortened. The full extracted text will be sent for adaptation.' : ''}
+              {hasMoreSource
+                ? '\n\n… Preview shortened. The full extracted text will be sent for adaptation.'
+                : ''}
             </pre>
           </details>
         </section>
@@ -148,9 +156,7 @@ export function AdaptiveLesson({ lesson, onBack }: AdaptiveLessonProps) {
             </span>
             <div>
               <p className="stage-label">Step 2</p>
-              <h2 id="ai-adaptation-heading" className="section-title">
-                AI Adaptation
-              </h2>
+              <h2 id="ai-adaptation-heading" className="section-title">AI Adaptation</h2>
             </div>
           </div>
           <p className="adaptive-description">
@@ -201,32 +207,34 @@ export function AdaptiveLesson({ lesson, onBack }: AdaptiveLessonProps) {
                 All five explanations and your personalized lesson are ready.
               </p>
               <section className="adaptation-results" aria-labelledby="results-heading">
-              <h3 id="results-heading" className="results-heading">Generated explanations</h3>
-              <article className="result-card">
-                <h4><BookOpen size={17} aria-hidden="true" /> Standard explanation</h4>
-                <p className="result-copy">{adaptations.standardExplanation}</p>
-              </article>
-              <article className="result-card">
-                <h4><Type size={17} aria-hidden="true" /> Easy-to-read explanation</h4>
-                <p className="result-copy">{adaptations.easyToReadExplanation}</p>
-              </article>
-              <article className="result-card">
-                <h4><CheckCircle2 size={17} aria-hidden="true" /> Step-by-step explanation</h4>
-                <ol className="step-list">
-                  {adaptations.stepByStepExplanation.map((step, index) => (
-                    <li key={`${index}-${step.slice(0, 24)}`}>{step}</li>
-                  ))}
-                </ol>
-              </article>
-              <article className="result-card visual-result">
-                <h4><ImageIcon size={17} aria-hidden="true" /> Visual explanation</h4>
-                <pre className="result-copy visual-copy">{adaptations.visualExplanation}</pre>
-              </article>
-              <article className="result-card">
-                <h4><Headphones size={17} aria-hidden="true" /> Audio-ready explanation</h4>
-                <p className="result-copy">{adaptations.audioReadyExplanation}</p>
-                <p className="audio-caption">Prepared as spoken-word text. Audio playback is not included yet.</p>
-              </article>
+                <h3 id="results-heading" className="results-heading">Generated explanations</h3>
+                <article className="result-card">
+                  <h4><BookOpen size={17} aria-hidden="true" /> Standard explanation</h4>
+                  <p className="result-copy">{adaptations.standardExplanation}</p>
+                </article>
+                <article className="result-card">
+                  <h4><Type size={17} aria-hidden="true" /> Easy-to-read explanation</h4>
+                  <p className="result-copy">{adaptations.easyToReadExplanation}</p>
+                </article>
+                <article className="result-card">
+                  <h4><CheckCircle2 size={17} aria-hidden="true" /> Step-by-step explanation</h4>
+                  <ol className="step-list">
+                    {adaptations.stepByStepExplanation.map((step, index) => (
+                      <li key={`${index}-${step.slice(0, 24)}`}>{step}</li>
+                    ))}
+                  </ol>
+                </article>
+                <article className="result-card visual-result">
+                  <h4><ImageIcon size={17} aria-hidden="true" /> Visual explanation</h4>
+                  <pre className="result-copy visual-copy">{adaptations.visualExplanation}</pre>
+                </article>
+                <article className="result-card">
+                  <h4><Headphones size={17} aria-hidden="true" /> Audio-ready explanation</h4>
+                  <p className="result-copy">{adaptations.audioReadyExplanation}</p>
+                  <p className="audio-caption">
+                    Prepared as spoken-word text. Audio playback is available on the next screen.
+                  </p>
+                </article>
               </section>
             </>
           )}
@@ -243,9 +251,7 @@ export function AdaptiveLesson({ lesson, onBack }: AdaptiveLessonProps) {
             </span>
             <div>
               <p className="stage-label">Step 3</p>
-              <h2 id="personalized-heading" className="section-title">
-                Personalized Lesson
-              </h2>
+              <h2 id="personalized-heading" className="section-title">Personalized Lesson</h2>
             </div>
           </div>
           {adaptations ? (
@@ -258,6 +264,18 @@ export function AdaptiveLesson({ lesson, onBack }: AdaptiveLessonProps) {
             <p className="muted personalized-placeholder">
               Generate the AI adaptations to see a lesson shaped around your saved learning preferences.
             </p>
+          )}
+          {adaptations && (
+            <div className="personalized-actions">
+              <button
+                type="button"
+                className="start-button"
+                onClick={() => onContinueToPersonalized(adaptations)}
+              >
+                Start Personalized Learning
+                <ArrowRight size={19} aria-hidden="true" />
+              </button>
+            </div>
           )}
         </section>
       </div>

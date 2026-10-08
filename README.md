@@ -25,8 +25,9 @@ adapt text, audio, visuals, and learning methods to different student needs.
 - **Work #5 — Adaptive Learning Engine** ✅ — Sends the extracted lesson and
   saved preferences to a server-side AI provider and displays standard,
   easy-to-read, step-by-step, visual, audio-ready, and personalized lesson
-  versions. The API key is read only by the Node server from an environment
-  variable; no key is included in the browser bundle.
+  versions. The Personalized Learning screen switches between four formats
+  and uses the browser Web Speech API to read the lesson aloud. The API key is
+  read only by the Node server; no key is included in the browser bundle.
 
 ## Getting started
 
