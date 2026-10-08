@@ -4,7 +4,6 @@ import {
   Check,
   FileText,
   Home,
-  Info,
   Pencil,
   PlayCircle,
   Upload,
@@ -24,6 +23,8 @@ interface DashboardProps {
   onHome: () => void
   onEditPreferences: () => void
   onUploadLesson: () => void
+  onStartLesson: () => void
+  hasUploadedLesson: boolean
 }
 
 function formatDate(iso: string): string {
@@ -38,10 +39,11 @@ export function Dashboard({
   onHome,
   onEditPreferences,
   onUploadLesson,
+  onStartLesson,
+  hasUploadedLesson,
 }: DashboardProps) {
   const profile = loadProfile()
   const [recentLessons] = useState<RecentLesson[]>(loadRecentLessons)
-  const [startMessage, setStartMessage] = useState(false)
 
   const hasPreferences =
     profile.supports.length > 0 || profile.preference !== null
@@ -125,16 +127,16 @@ export function Dashboard({
             Start a New Lesson
           </h2>
           <p className="muted">
-            Upload a PDF lesson to extract its text and get started.
+            Start with a PDF and create a lesson adapted to your learning preferences.
           </p>
 
           <div className="main-actions">
             <button
               type="button"
               className="start-button"
-              onClick={() => setStartMessage(true)}
+              onClick={onStartLesson}
             >
-              Start Lesson
+              {hasUploadedLesson ? 'Continue Lesson' : 'Start Lesson'}
               <ArrowRight size={20} aria-hidden="true" />
             </button>
             <button
@@ -146,14 +148,6 @@ export function Dashboard({
               Upload Lesson
             </button>
           </div>
-
-          {startMessage && (
-            <p className="note" role="status">
-              <Info size={18} aria-hidden="true" />
-              New lessons are coming soon. In the meantime, you can upload a
-              lesson with the Upload Lesson button.
-            </p>
-          )}
         </section>
 
         {/* ---- Recent Lessons ---- */}

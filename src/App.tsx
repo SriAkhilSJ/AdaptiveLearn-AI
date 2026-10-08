@@ -40,6 +40,8 @@ function App() {
           onHome={() => setView('landing')}
           onEditPreferences={() => setView('profile')}
           onUploadLesson={() => setView('upload')}
+          onStartLesson={() => setView(uploadedLesson ? 'adaptation' : 'upload')}
+          hasUploadedLesson={uploadedLesson !== null}
         />
       )}
       {view === 'upload' && (
