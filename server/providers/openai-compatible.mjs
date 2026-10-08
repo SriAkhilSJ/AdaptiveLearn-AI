@@ -43,7 +43,7 @@ export function createOpenAICompatibleProvider({
             model,
             messages,
             temperature: 0.3,
-            max_tokens: 6000,
+            max_tokens: 8000,
             response_format: { type: 'json_object' },
           }),
           signal: AbortSignal.timeout(90_000),
@@ -67,6 +67,14 @@ export function createOpenAICompatibleProvider({
           throw new ProviderError('The AI provider is busy or rate-limited. Please try again shortly.', 429)
         }
         throw new ProviderError(`The AI provider returned an error (${response.status}).`, 502)
+      }
+
+      const finishReason = payload?.choices?.[0]?.finish_reason
+      if (finishReason === 'length' || finishReason === 'max_tokens') {
+        throw new ProviderError(
+          'The AI response was cut short. Try again with a shorter lesson.',
+          502,
+        )
       }
 
       const content = payload?.choices?.[0]?.message?.content

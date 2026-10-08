@@ -44,3 +44,20 @@ test('does not make a provider request if the server key is missing', async () =
   await assert.rejects(provider.generate({ messages }), /AI_API_KEY is not configured/)
   assert.equal(called, false)
 })
+
+test('reports a completion cut off by the provider token limit', async () => {
+  const provider = createOpenAICompatibleProvider({
+    apiKey: 'test-key',
+    fetchImpl: async () => new Response(
+      JSON.stringify({
+        choices: [{ finish_reason: 'length', message: { content: '{"partial":' } }],
+      }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    ),
+  })
+
+  await assert.rejects(
+    provider.generate({ messages }),
+    /response was cut short/i,
+  )
+})

@@ -31,6 +31,8 @@ test('builds all adaptation formats and includes saved preferences in the provid
   assert.match(prompt, /Visual \(pictures and diagrams\)/)
   assert.match(prompt, /Easy-to-read text/)
   assert.match(prompt, /More repetition/)
+  assert.match(prompt, /never claim that audio has been recorded/i)
+  assert.match(prompt, /finish every section cleanly/i)
   assert.match(prompt, /sourceLessonText/)
 })
 
