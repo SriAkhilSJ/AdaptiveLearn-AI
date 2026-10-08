@@ -12,6 +12,7 @@ import {
   VolumeX,
 } from 'lucide-react'
 import type { LessonAdaptations, UploadedLesson } from '../lib/adaptive'
+import { VisualExplanation } from './VisualExplanation'
 import {
   getPreferenceTitle,
   getSupportTitle,
@@ -110,8 +111,19 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
   }
 
   const selectMode = (nextMode: LessonMode) => {
+    if (nextMode === mode) {
+      if (nextMode === 'audio' && !isSpeaking) {
+        speak(adaptations.audioReadyExplanation, 'Reading the audio-ready explanation aloud.')
+      }
+      return
+    }
+
     if (isSpeaking) stopSpeech('Reading stopped because the lesson format changed.')
     setMode(nextMode)
+    if (nextMode === 'audio') {
+      speak(adaptations.audioReadyExplanation, 'Reading the audio-ready explanation aloud.')
+      return
+    }
     setSpeechMessage(`Showing ${MODE_TITLES[nextMode]}.`)
   }
 
@@ -198,6 +210,23 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
               <h3 id="active-lesson-heading">{MODE_TITLES[mode]}</h3>
             </div>
 
+            {mode === 'audio' && (
+              <div className="audio-playback-panel">
+                <button
+                  type="button"
+                  className="audio-playback-button"
+                  aria-pressed={isSpeaking}
+                  onClick={handleListen}
+                >
+                  {isSpeaking ? <VolumeX size={19} aria-hidden="true" /> : <Volume2 size={19} aria-hidden="true" />}
+                  {isSpeaking ? 'Stop audio' : 'Play audio'}
+                </button>
+                <p className="audio-playback-hint">
+                  Uses your browser’s built-in voice. The text below stays visible as a transcript.
+                </p>
+              </div>
+            )}
+
             {mode === 'step-by-step' ? (
               <ol className="learning-step-list">
                 {adaptations.stepByStepExplanation.map((step, index) => (
@@ -205,7 +234,7 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
                 ))}
               </ol>
             ) : mode === 'visual' ? (
-              <pre className="learning-visual-text">{adaptations.visualExplanation}</pre>
+              <VisualExplanation explanation={adaptations.visualExplanation} />
             ) : (
               <div className="learning-prose">
                 {mode === 'personalized' && adaptations.personalizedLesson}

@@ -6,7 +6,15 @@ const output = {
   standardExplanation: 'A clear standard explanation.',
   easyToReadExplanation: 'A short and simple explanation.',
   stepByStepExplanation: ['First, begin.', 'Next, continue.'],
-  visualExplanation: 'Start → Middle → End',
+  visualExplanation: {
+    title: 'Water cycle',
+    layout: 'flow',
+    items: [
+      { label: 'Evaporation', details: ['Water warms and rises'] },
+      { label: 'Clouds', details: ['Water vapor cools'] },
+      { label: 'Rain', details: ['Water falls back to Earth'] },
+    ],
+  },
   audioReadyExplanation: 'Let us explain this aloud.',
   personalizedLesson: 'A lesson shaped around the learner preferences.',
 }
@@ -34,6 +42,33 @@ test('builds all adaptation formats and includes saved preferences in the provid
   assert.match(prompt, /never claim that audio has been recorded/i)
   assert.match(prompt, /finish every section cleanly/i)
   assert.match(prompt, /sourceLessonText/)
+})
+
+test('converts legacy text visual explanations into compact diagram cards', async () => {
+  const legacyVisual = [
+    'Evolution of AI Operations (a stack, oldest at the bottom):',
+    '[1] CLOUD COMPUTING & DEVOPS',
+    'Industry problems and the tools used to solve them.',
+    '[2] MLOPS & MODEL DEPLOYMENT',
+    'Packaging and serving machine learning models.',
+    '[3] AGENTOPS & ORCHESTRATION',
+    'Agents plan tasks and use tools.',
+  ].join('\n')
+  const service = createAdaptationService({
+    generate: async () => JSON.stringify({ ...output, visualExplanation: legacyVisual }),
+  })
+
+  const result = await service.adapt(lesson)
+  assert.equal(result.visualExplanation.title, 'Evolution of AI Operations (a stack, oldest at the bottom)')
+  assert.equal(result.visualExplanation.layout, 'stack')
+  assert.deepEqual(result.visualExplanation.items.map((item) => item.label), [
+    'CLOUD COMPUTING & DEVOPS',
+    'MLOPS & MODEL DEPLOYMENT',
+    'AGENTOPS & ORCHESTRATION',
+  ])
+  assert.deepEqual(result.visualExplanation.items[0].details, [
+    'Industry problems and the tools used to solve them.',
+  ])
 })
 
 test('normalizes a step-by-step string into a list', async () => {

@@ -73,9 +73,9 @@ A configured server responds with `"aiConfigured":true`. If it is `false`, check
 3. Browse for or drag in a PDF, then select **Continue** to extract its text.
 4. After the upload succeeds, select **Continue** to open the adaptation screen.
 5. Review **Original Lesson → AI Adaptation → Personalized Lesson**, then select **Generate adaptations**.
-6. Select **Start Personalized Learning**. Switch among **Easy Text**, **Step-by-Step**, **Visual**, and **Audio**. Use **Listen** for browser speech, **Explain More Simply** for easy text, **Show Visual** for the visual format, or **Explain Again** to hear the step-by-step version.
+6. Select **Start Personalized Learning**. Switch among **Easy Text**, **Step-by-Step**, **Visual**, and **Audio**. Selecting **Audio** starts the browser's built-in voice; use its **Play audio / Stop audio** control or the **Listen** action to control playback. Use **Explain More Simply** for easy text, **Show Visual** for the diagram, or **Explain Again** to hear the step-by-step version.
 
-The engine returns standard, easy-to-read, step-by-step, visual, and audio-ready explanations, plus a personalized lesson based on the saved preferences. The visual version is a text-based diagram/layout. The Listen button uses the browser's Web Speech API; available voices depend on the browser and device. If speech synthesis is unsupported, the lesson remains available to read on screen.
+The engine returns standard, easy-to-read, step-by-step, visual, and audio-ready explanations, plus a personalized lesson based on the saved preferences. The visual version is a concise card-based diagram. Audio uses the browser's Web Speech API and leaves the text visible as a transcript; available voices depend on the browser and device. If speech synthesis is unsupported, the lesson remains available to read on screen.
 
 PDF text and saved learning preferences are sent to the configured AI provider only after the student chooses **Generate adaptations**. PDF text extraction happens locally in the browser. Scanned/image-only PDFs are not OCR'd.
 

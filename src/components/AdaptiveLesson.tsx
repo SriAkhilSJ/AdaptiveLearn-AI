@@ -17,6 +17,7 @@ import {
   type LessonAdaptations,
   type UploadedLesson,
 } from '../lib/adaptive'
+import { VisualExplanation } from './VisualExplanation'
 import {
   getPreferenceTitle,
   getSupportTitle,
@@ -226,7 +227,9 @@ export function AdaptiveLesson({
                 </article>
                 <article className="result-card visual-result">
                   <h4><ImageIcon size={17} aria-hidden="true" /> Visual explanation</h4>
-                  <pre className="result-copy visual-copy">{adaptations.visualExplanation}</pre>
+                  <div className="result-copy visual-copy">
+                    <VisualExplanation explanation={adaptations.visualExplanation} />
+                  </div>
                 </article>
                 <article className="result-card">
                   <h4><Headphones size={17} aria-hidden="true" /> Audio-ready explanation</h4>

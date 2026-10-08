@@ -7,11 +7,22 @@ export interface UploadedLesson {
   text: string
 }
 
+export type VisualLayout = 'flow' | 'stack' | 'comparison'
+
+export interface VisualExplanation {
+  title: string
+  layout: VisualLayout
+  items: Array<{
+    label: string
+    details: string[]
+  }>
+}
+
 export interface LessonAdaptations {
   standardExplanation: string
   easyToReadExplanation: string
   stepByStepExplanation: string[]
-  visualExplanation: string
+  visualExplanation: VisualExplanation
   audioReadyExplanation: string
   personalizedLesson: string
 }
