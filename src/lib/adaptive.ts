@@ -39,6 +39,13 @@ export interface LessonQuiz {
   questions: LessonQuizQuestion[]
 }
 
+export interface LessonQuizFeedback {
+  concept: string
+  simpleExplanation: string
+  visualExplanation: VisualExplanation
+  example: string
+}
+
 interface AdaptationApiResponse {
   adaptations?: LessonAdaptations
   error?: string
@@ -46,6 +53,11 @@ interface AdaptationApiResponse {
 
 interface QuizApiResponse {
   quiz?: LessonQuiz
+  error?: string
+}
+
+interface QuizFeedbackApiResponse {
+  feedback?: LessonQuizFeedback
   error?: string
 }
 
@@ -117,4 +129,53 @@ export async function requestLessonQuiz(lesson: UploadedLesson): Promise<LessonQ
     throw new Error('The AI service returned an incomplete quiz. Please try again.')
   }
   return payload.quiz
+}
+
+/** Generate focused reteaching after a wrong answer; the correct answer is not sent to the provider. */
+export async function requestLessonQuizFeedback(
+  lesson: UploadedLesson,
+  question: LessonQuizQuestion,
+  incorrectAnswer: string,
+): Promise<LessonQuizFeedback> {
+  let response: Response
+  try {
+    response = await fetch('/api/quiz/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lesson: { title: lesson.name, text: lesson.text },
+        question: {
+          question: question.question,
+          choices: question.choices,
+          concept: question.concept,
+        },
+        incorrectAnswer,
+      }),
+    })
+  } catch {
+    throw new Error(
+      'The adaptive feedback service could not be reached. Check that the app server is running and try again.',
+    )
+  }
+
+  let payload: QuizFeedbackApiResponse = {}
+  try {
+    payload = (await response.json()) as QuizFeedbackApiResponse
+  } catch {
+    // The response may be empty when the service is restarting.
+  }
+
+  if (!response.ok) {
+    throw new Error(payload.error || 'Adaptive feedback could not be created. Please try again.')
+  }
+  if (
+    !payload.feedback ||
+    !payload.feedback.simpleExplanation ||
+    !payload.feedback.example ||
+    !Array.isArray(payload.feedback.visualExplanation?.items) ||
+    payload.feedback.visualExplanation.items.length < 2
+  ) {
+    throw new Error('The AI service returned incomplete adaptive feedback. Please try again.')
+  }
+  return payload.feedback
 }

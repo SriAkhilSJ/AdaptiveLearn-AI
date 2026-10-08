@@ -8,14 +8,21 @@ import {
   RotateCcw,
   Trophy,
 } from 'lucide-react'
-import { requestLessonQuiz, type LessonQuiz, type UploadedLesson } from '../lib/adaptive'
+import {
+  requestLessonQuiz,
+  requestLessonQuizFeedback,
+  type LessonQuiz,
+  type LessonQuizFeedback,
+  type UploadedLesson,
+} from '../lib/adaptive'
+import { VisualExplanation } from './VisualExplanation'
 import './LessonQuiz.css'
 
 interface LessonQuizProps {
   lesson: UploadedLesson
 }
 
-type QuizScreen = 'intro' | 'loading' | 'question' | 'results'
+type QuizScreen = 'intro' | 'loading' | 'question' | 'feedback-loading' | 'feedback' | 'retry' | 'retry-result' | 'results'
 
 interface MissedQuestion {
   questionNumber: number
@@ -23,6 +30,19 @@ interface MissedQuestion {
   selectedAnswer: string
   correctAnswer: string
   explanation: string
+}
+
+interface QuizProgressProps {
+  questionIndex: number
+  totalQuestions: number
+  practice?: boolean
+}
+
+interface AnswerOptionsProps {
+  choices: string[]
+  selectedIndex: number | null
+  name: string
+  onSelect: (answerIndex: number) => void
 }
 
 function summarizeQuiz(quiz: LessonQuiz, answers: Array<number | null>) {
@@ -51,11 +71,91 @@ function summarizeQuiz(quiz: LessonQuiz, answers: Array<number | null>) {
   return { score, missedByConcept }
 }
 
+function QuizProgress({ questionIndex, totalQuestions, practice = false }: QuizProgressProps) {
+  const progress = ((questionIndex + 1) / totalQuestions) * 100
+  const label = `Question ${questionIndex + 1} of ${totalQuestions}${practice ? ', practice retry' : ''}`
+
+  return (
+    <>
+      <div className="quiz-progress-heading" aria-live="polite">
+        <span>{label}</span>
+        <span>{Math.round(progress)}%</span>
+      </div>
+      <div
+        className="quiz-progress-track"
+        role="progressbar"
+        aria-label="Quiz progress"
+        aria-valuemin={1}
+        aria-valuemax={totalQuestions}
+        aria-valuenow={questionIndex + 1}
+        aria-valuetext={label}
+      >
+        <span style={{ width: `${progress}%` }} />
+      </div>
+    </>
+  )
+}
+
+function AnswerOptions({ choices, selectedIndex, name, onSelect }: AnswerOptionsProps) {
+  return (
+    <div className="quiz-options">
+      {choices.map((choice, choiceIndex) => (
+        <label
+          className={`quiz-option${selectedIndex === choiceIndex ? ' is-selected' : ''}`}
+          key={`${choiceIndex}-${choice.slice(0, 24)}`}
+        >
+          <input
+            type="radio"
+            name={name}
+            value={choiceIndex}
+            checked={selectedIndex === choiceIndex}
+            onChange={() => onSelect(choiceIndex)}
+          />
+          <span className="quiz-option-letter" aria-hidden="true">
+            {String.fromCharCode(65 + choiceIndex)}
+          </span>
+          <span>{choice}</span>
+        </label>
+      ))}
+    </div>
+  )
+}
+
+function AdaptiveFeedbackContent({ feedback }: { feedback: LessonQuizFeedback }) {
+  return (
+    <div className="quiz-adaptive-feedback">
+      <p className="quiz-feedback-lead">You may find this concept easier this way.</p>
+      <p className="quiz-weak-concept">
+        <span>Concept to review</span>
+        <strong>{feedback.concept}</strong>
+      </p>
+
+      <section className="quiz-feedback-section" aria-labelledby="simple-feedback-heading">
+        <h3 id="simple-feedback-heading">Simple explanation</h3>
+        <p>{feedback.simpleExplanation}</p>
+      </section>
+
+      <section className="quiz-feedback-section quiz-feedback-visual" aria-labelledby="visual-feedback-heading">
+        <h3 id="visual-feedback-heading" className="visually-hidden">Different format: visual explanation</h3>
+        <VisualExplanation explanation={feedback.visualExplanation} />
+      </section>
+
+      <section className="quiz-feedback-section" aria-labelledby="example-feedback-heading">
+        <h3 id="example-feedback-heading">One small example</h3>
+        <p>{feedback.example}</p>
+      </section>
+    </div>
+  )
+}
+
 export function LessonQuiz({ lesson }: LessonQuizProps) {
   const [screen, setScreen] = useState<QuizScreen>('intro')
   const [quiz, setQuiz] = useState<LessonQuiz | null>(null)
   const [answers, setAnswers] = useState<Array<number | null>>([])
   const [questionIndex, setQuestionIndex] = useState(0)
+  const [feedback, setFeedback] = useState<LessonQuizFeedback | null>(null)
+  const [retryAnswer, setRetryAnswer] = useState<number | null>(null)
+  const [retryWasCorrect, setRetryWasCorrect] = useState<boolean | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleCreateQuiz = async () => {
@@ -66,6 +166,7 @@ export function LessonQuiz({ lesson }: LessonQuizProps) {
       setQuiz(generatedQuiz)
       setAnswers(Array(generatedQuiz.questions.length).fill(null))
       setQuestionIndex(0)
+      setFeedback(null)
       setScreen('question')
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'The quiz could not be created. Please try again.')
@@ -74,6 +175,7 @@ export function LessonQuiz({ lesson }: LessonQuizProps) {
   }
 
   const handleSelectAnswer = (answerIndex: number) => {
+    setError(null)
     setAnswers((currentAnswers) => {
       const updatedAnswers = [...currentAnswers]
       updatedAnswers[questionIndex] = answerIndex
@@ -81,28 +183,81 @@ export function LessonQuiz({ lesson }: LessonQuizProps) {
     })
   }
 
-  const handleNext = () => {
-    if (!quiz || answers[questionIndex] === null || answers[questionIndex] === undefined) return
+  const advanceAfterQuestion = () => {
+    if (!quiz) return
+    setFeedback(null)
+    setRetryAnswer(null)
+    setRetryWasCorrect(null)
     if (questionIndex === quiz.questions.length - 1) {
       setScreen('results')
       return
     }
     setQuestionIndex((currentIndex) => currentIndex + 1)
+    setScreen('question')
+  }
+
+  const handleNext = async () => {
+    const question = quiz?.questions[questionIndex]
+    const selectedIndex = answers[questionIndex]
+    if (!question || selectedIndex === null || selectedIndex === undefined) return
+
+    if (selectedIndex === question.correctIndex) {
+      advanceAfterQuestion()
+      return
+    }
+
+    setScreen('feedback-loading')
+    setError(null)
+    try {
+      const generatedFeedback = await requestLessonQuizFeedback(
+        lesson,
+        question,
+        question.choices[selectedIndex],
+      )
+      setFeedback(generatedFeedback)
+      setRetryAnswer(null)
+      setRetryWasCorrect(null)
+      setScreen('feedback')
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? `${cause.message} Your answer is saved; select Next to try generating the feedback again.`
+          : 'Adaptive feedback could not be created. Your answer is saved; select Next to try again.',
+      )
+      setScreen('question')
+    }
   }
 
   const handlePrevious = () => {
+    setError(null)
     setQuestionIndex((currentIndex) => Math.max(0, currentIndex - 1))
+  }
+
+  const handleStartRetry = () => {
+    setRetryAnswer(null)
+    setRetryWasCorrect(null)
+    setScreen('retry')
+  }
+
+  const handleCheckRetry = () => {
+    const question = quiz?.questions[questionIndex]
+    if (!question || retryAnswer === null) return
+    setRetryWasCorrect(retryAnswer === question.correctIndex)
+    setScreen('retry-result')
   }
 
   const handleTryAgain = () => {
     if (!quiz) return
     setAnswers(Array(quiz.questions.length).fill(null))
     setQuestionIndex(0)
+    setFeedback(null)
+    setRetryAnswer(null)
+    setRetryWasCorrect(null)
+    setError(null)
     setScreen('question')
   }
 
   const question = quiz?.questions[questionIndex]
-  const progress = quiz ? ((questionIndex + 1) / quiz.questions.length) * 100 : 0
   const summary = screen === 'results' && quiz ? summarizeQuiz(quiz, answers) : null
 
   return (
@@ -129,7 +284,7 @@ export function LessonQuiz({ lesson }: LessonQuizProps) {
             Create quiz
           </button>
           <p className="quiz-privacy-note">
-            The uploaded lesson text is sent to your configured AI provider only when you create the quiz.
+            The uploaded lesson text is sent to your configured AI provider to create the quiz. If you miss an answer, it is also used to generate targeted feedback.
           </p>
         </div>
       )}
@@ -143,44 +298,17 @@ export function LessonQuiz({ lesson }: LessonQuizProps) {
 
       {screen === 'question' && question && quiz && (
         <div className="quiz-question-screen">
-          <div className="quiz-progress-heading" aria-live="polite">
-            <span>Question {questionIndex + 1} of {quiz.questions.length}</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-          <div
-            className="quiz-progress-track"
-            role="progressbar"
-            aria-label="Quiz progress"
-            aria-valuemin={1}
-            aria-valuemax={quiz.questions.length}
-            aria-valuenow={questionIndex + 1}
-            aria-valuetext={`Question ${questionIndex + 1} of ${quiz.questions.length}`}
-          >
-            <span style={{ width: `${progress}%` }} />
-          </div>
+          <QuizProgress questionIndex={questionIndex} totalQuestions={quiz.questions.length} />
+          {error && <p className="quiz-error" role="alert">{error}</p>}
 
           <fieldset className="quiz-question-fieldset">
             <legend className="quiz-question-prompt">{question.question}</legend>
-            <div className="quiz-options">
-              {question.choices.map((choice, choiceIndex) => (
-                <label
-                  className={`quiz-option${answers[questionIndex] === choiceIndex ? ' is-selected' : ''}`}
-                  key={`${choiceIndex}-${choice.slice(0, 24)}`}
-                >
-                  <input
-                    type="radio"
-                    name={`lesson-quiz-question-${questionIndex}`}
-                    value={choiceIndex}
-                    checked={answers[questionIndex] === choiceIndex}
-                    onChange={() => handleSelectAnswer(choiceIndex)}
-                  />
-                  <span className="quiz-option-letter" aria-hidden="true">
-                    {String.fromCharCode(65 + choiceIndex)}
-                  </span>
-                  <span>{choice}</span>
-                </label>
-              ))}
-            </div>
+            <AnswerOptions
+              choices={question.choices}
+              selectedIndex={answers[questionIndex] ?? null}
+              name={`lesson-quiz-question-${questionIndex}`}
+              onSelect={handleSelectAnswer}
+            />
           </fieldset>
 
           <div className="quiz-navigation">
@@ -203,6 +331,96 @@ export function LessonQuiz({ lesson }: LessonQuizProps) {
               <ArrowRight size={17} aria-hidden="true" />
             </button>
           </div>
+        </div>
+      )}
+
+      {screen === 'feedback-loading' && question && quiz && (
+        <div className="quiz-feedback-loading" role="status" aria-live="polite" aria-busy="true">
+          <QuizProgress questionIndex={questionIndex} totalQuestions={quiz.questions.length} />
+          <p className="quiz-loading">
+            <LoaderCircle className="quiz-spinner" size={20} aria-hidden="true" />
+            Finding a simpler way to explain {question.concept}…
+          </p>
+        </div>
+      )}
+
+      {screen === 'feedback' && question && quiz && feedback && (
+        <div className="quiz-feedback-screen">
+          <QuizProgress questionIndex={questionIndex} totalQuestions={quiz.questions.length} />
+          <AdaptiveFeedbackContent feedback={feedback} />
+          <p className="quiz-retry-score-note">
+            This retry is practice. Your quiz score is based on your first answer.
+          </p>
+          <div className="quiz-feedback-actions">
+            <button type="button" className="quiz-primary-button" onClick={handleStartRetry}>
+              Try this question again
+              <RotateCcw size={17} aria-hidden="true" />
+            </button>
+            <button type="button" className="quiz-secondary-button" onClick={advanceAfterQuestion}>
+              Continue without retry
+              <ArrowRight size={17} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === 'retry' && question && quiz && feedback && (
+        <div className="quiz-question-screen quiz-retry-screen">
+          <QuizProgress questionIndex={questionIndex} totalQuestions={quiz.questions.length} practice />
+          <p className="quiz-retry-instruction">Use the explanation, then choose an answer again.</p>
+          <details className="quiz-retry-review">
+            <summary>Review the simpler and visual explanations</summary>
+            <AdaptiveFeedbackContent feedback={feedback} />
+          </details>
+          <fieldset className="quiz-question-fieldset">
+            <legend className="quiz-question-prompt">{question.question}</legend>
+            <AnswerOptions
+              choices={question.choices}
+              selectedIndex={retryAnswer}
+              name={`lesson-quiz-retry-${questionIndex}`}
+              onSelect={setRetryAnswer}
+            />
+          </fieldset>
+          <div className="quiz-navigation">
+            <button type="button" className="quiz-secondary-button" onClick={() => setScreen('feedback')}>
+              <ArrowLeft size={17} aria-hidden="true" />
+              Review feedback
+            </button>
+            <button
+              type="button"
+              className="quiz-primary-button"
+              onClick={handleCheckRetry}
+              disabled={retryAnswer === null}
+            >
+              Check retry
+              <ArrowRight size={17} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === 'retry-result' && question && retryWasCorrect !== null && (
+        <div className="quiz-retry-result" aria-live="polite">
+          <QuizProgress questionIndex={questionIndex} totalQuestions={quiz?.questions.length ?? 5} practice />
+          {retryWasCorrect ? (
+            <p className="quiz-retry-success">
+              <CheckCircle2 size={20} aria-hidden="true" />
+              That’s right—you used the new explanation to answer correctly.
+            </p>
+          ) : (
+            <div className="quiz-retry-correction">
+              <h3>Let’s review the key idea</h3>
+              <p><strong>Correct answer:</strong> {question.choices[question.correctIndex]}</p>
+              <p>{question.explanation}</p>
+            </div>
+          )}
+          <p className="quiz-retry-score-note">
+            Your score still reflects your first answer. This retry is practice.
+          </p>
+          <button type="button" className="quiz-primary-button" onClick={advanceAfterQuestion}>
+            {questionIndex === (quiz?.questions.length ?? 1) - 1 ? 'See final score' : 'Continue to next question'}
+            <ArrowRight size={17} aria-hidden="true" />
+          </button>
         </div>
       )}
 

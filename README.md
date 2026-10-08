@@ -30,7 +30,9 @@ adapt text, audio, visuals, and learning methods to different student needs.
   read only by the Node server; no key is included in the browser bundle.
 - **Work #6 — Lesson Quiz** ✅ — Creates five multiple-choice questions from
   the uploaded lesson, presents one question at a time with four choices and
-  progress, then reports the score and concepts to review.
+  progress, then reports the first-attempt score and concepts to review. Wrong
+  answers trigger targeted, simpler and visual feedback, a small example, and
+  a retry.
 
 ## Getting started
 
@@ -55,8 +57,9 @@ never commit `.env`.**
 
 PDF text and selected learning preferences are sent to the configured AI
 provider only when the student chooses **Generate adaptations**. The lesson
-text is also sent to the provider only when the student chooses **Create quiz**.
-Scanned PDFs without selectable text are not OCR'd.
+text is also sent to the provider when the student chooses **Create quiz**; if
+an answer is incorrect, the lesson, question, and selected answer are sent to
+generate targeted feedback. Scanned PDFs without selectable text are not OCR'd.
 
 ## Changing the AI provider
 
