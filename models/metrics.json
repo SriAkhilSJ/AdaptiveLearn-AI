@@ -1,0 +1,93 @@
+{
+  "classes": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z"
+  ],
+  "n_classes": 36,
+  "n_real_samples": 9093,
+  "n_train_augmented": 27276,
+  "n_test": 1364,
+  "feature_dim": 96,
+  "validation_accuracy": 0.9,
+  "test_accuracy": 0.9084,
+  "top1_margin": 0.6031,
+  "fit_seconds": 13.4,
+  "model_size_mb": 20.14,
+  "confusions": [
+    {
+      "true": "9",
+      "predicted": "C",
+      "count": 4
+    },
+    {
+      "true": "N",
+      "predicted": "R",
+      "count": 4
+    },
+    {
+      "true": "X",
+      "predicted": "T",
+      "count": 4
+    },
+    {
+      "true": "0",
+      "predicted": "9",
+      "count": 3
+    },
+    {
+      "true": "9",
+      "predicted": "Q",
+      "count": 3
+    },
+    {
+      "true": "G",
+      "predicted": "W",
+      "count": 3
+    },
+    {
+      "true": "N",
+      "predicted": "M",
+      "count": 3
+    },
+    {
+      "true": "1",
+      "predicted": "F",
+      "count": 2
+    }
+  ],
+  "dataset": "sajanraj/Indian-Sign-Language-Recognition (ICICCT 2018), MediaPipe landmark mining"
+}

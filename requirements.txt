@@ -1,0 +1,27 @@
+# TalkWithGesture -- offline ISL translation (PS-AIML-04)
+#
+# mediapipe 0.10.x is pinned deliberately: from 1.0 the pip wheel no longer
+# bundles the palm-detection / hand-landmark TFLite models or the
+# `mp.solutions.hands` API, and downloading the .task models needs network
+# access -- which is exactly what an offline counter system cannot rely on.
+mediapipe==0.10.14
+
+# Headless OpenCV build: mediapipe pulls in opencv-contrib-python, which links
+# against libGL and fails on headless servers / Raspberry Pi OS Lite.
+opencv-contrib-python-headless==4.10.0.84
+
+numpy>=1.26,<3
+scikit-learn>=1.4
+joblib>=1.3
+
+# Local web UI
+fastapi>=0.110
+uvicorn[standard]>=0.27
+
+# Optional offline TTS backends (see islg/tts.py). The browser's own
+# Speech Synthesis API is used when neither is installed.
+# piper-tts>=1.2 ; python_version < "3.13"
+# pyttsx3>=2.90
+
+# Development
+pytest>=8.0

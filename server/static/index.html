@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TalkWithGesture — Offline ISL Counter Assistant</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">🤟</span>
+    <div>
+      <h1>TalkWithGesture</h1>
+      <p class="subtitle">Offline Indian Sign Language → speech, for public service counters</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="offline-badge" class="badge badge-off" title="All inference happens on this machine">
+      <span class="dot"></span> <span id="offline-text">connecting…</span>
+    </span>
+    <div class="lang-toggle" role="group" aria-label="Output language">
+      <button id="lang-en" class="active">English</button>
+      <button id="lang-hi">हिन्दी</button>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- ============================ camera ============================ -->
+  <section class="panel camera-panel">
+    <div class="stage">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div id="no-camera" class="no-camera hidden">
+        <h2>Camera unavailable</h2>
+        <p>This page needs camera access. Serve it over <code>https://</code> or
+           <code>localhost</code>, then allow the camera and reload.</p>
+      </div>
+      <div class="stage-hud">
+        <div class="hud-item"><span class="hud-label">FPS</span><span id="fps">–</span></div>
+        <div class="hud-item"><span class="hud-label">Hands</span><span id="hands">0</span></div>
+        <div class="hud-item"><span class="hud-label">Latency</span><span id="latency">–</span></div>
+      </div>
+    </div>
+
+    <div class="now-signing">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ring-bg" cx="60" cy="60" r="52" />
+          <circle id="ring-fg" class="ring-fg" cx="60" cy="60" r="52" />
+        </svg>
+        <div class="ring-centre">
+          <span id="current-sign">–</span>
+          <small id="current-confidence">0%</small>
+        </div>
+      </div>
+      <div class="sign-meta">
+        <p id="sign-description" class="sign-description">Waiting for a hand…</p>
+        <p id="sign-reason" class="sign-reason">show your hand to the camera</p>
+        <div id="top3" class="top3"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btn-start" class="btn btn-primary">Start camera</button>
+      <button id="btn-endword" class="btn">End word ␣</button>
+      <button id="btn-clear" class="btn">Clear</button>
+      <label class="switch"><input type="checkbox" id="chk-speak" checked /><span>Speak output</span></label>
+      <label class="switch"><input type="checkbox" id="chk-landmarks" checked /><span>Skeleton</span></label>
+    </div>
+  </section>
+
+  <!-- ============================ output ============================ -->
+  <section class="panel output-panel">
+    <h2 class="panel-title">Translation</h2>
+    <div id="sentence" class="sentence" lang="en">Sign to begin. The sentence appears here.</div>
+    <div id="sentence-alt" class="sentence-alt" lang="hi"></div>
+    <div class="pending-row">
+      <span class="pending-label">Spelling</span>
+      <span id="pending" class="pending"></span>
+    </div>
+    <div id="phrase-banner" class="phrase-banner hidden">
+      <span id="phrase-emoji" class="phrase-emoji"></span>
+      <div>
+        <strong id="phrase-en"></strong>
+        <span id="phrase-hi" class="phrase-hi"></span>
+      </div>
+    </div>
+
+    <h2 class="panel-title">Quick cards <small>if signing is hard, tap</small></h2>
+    <div id="domains" class="domains"></div>
+    <div id="cards" class="cards"></div>
+  </section>
+
+  <!-- ============================ reference =========================== -->
+  <section class="panel reference-panel">
+    <h2 class="panel-title">Model</h2>
+    <dl id="model-info" class="info-grid"></dl>
+
+    <h2 class="panel-title">Speech engines <small>local only</small></h2>
+    <ul id="engines" class="engines"></ul>
+
+    <h2 class="panel-title">Vocabulary</h2>
+    <div id="alphabet" class="alphabet"></div>
+    <p class="note">
+      Handshape illustrations are intentionally not drawn here: sign descriptions
+      must come from the ISLRTC dictionary or a Deaf consultant, not from a model
+      output. See <code>docs/LIMITATIONS.md</code>.
+    </p>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>PS-AIML-04 · no cloud calls are made — camera, landmarks, classifier and speech all run on this machine.</span>
+</footer>
+
+<script src="/static/app.js" type="module"></script>
+</body>
+</html>

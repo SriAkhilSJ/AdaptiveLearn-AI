@@ -1,0 +1,17 @@
+# Datasets are large and reproducible via scripts/00_download_dataset.sh
+data/
+*.tar.gz
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
