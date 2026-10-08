@@ -1,0 +1,160 @@
+/* Shared styles used across screens.
+   Screen-specific styles live next to their components. */
+
+.title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.subtitle {
+  max-width: 30rem;
+  margin: 0 auto 1.25rem;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  color: var(--muted);
+  text-align: center;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.section-hint {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 5.25rem;
+  height: 5.25rem;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+}
+
+.badge.success {
+  color: #15803d;
+  background: rgba(21, 128, 61, 0.12);
+  border-color: rgba(21, 128, 61, 0.4);
+}
+
+:root[data-theme='dark'] .badge.success {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  max-width: 34rem;
+  margin: 0 auto 1.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+  color: var(--text);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 0.75rem;
+}
+
+.note svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.start-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.9rem;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--button-text);
+  background: var(--button-bg);
+  border: none;
+  border-radius: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -12px var(--button-bg);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.start-button:hover {
+  background: var(--button-bg-hover);
+  transform: translateY(-1px);
+}
+
+.start-button:active {
+  transform: translateY(0);
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: 2px solid var(--accent-border);
+  border-radius: 0.9rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.secondary-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.back-button:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,189 @@
+/* Student Accessibility Profile screen (Work #2) */
+
+.profile-screen {
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1.25rem 2.5rem;
+  background:
+    radial-gradient(60rem 30rem at 15% -10%, rgba(109, 40, 217, 0.16), transparent 60%),
+    radial-gradient(50rem 26rem at 95% 110%, rgba(14, 165, 233, 0.14), transparent 60%),
+    var(--bg);
+}
+
+.profile-card {
+  width: min(46rem, 100%);
+  align-self: flex-start;
+  padding: clamp(1.5rem, 5vw, 2.75rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow);
+  animation: rise 0.6s ease-out both;
+}
+
+/* ---- Support cards (multi-select) ---- */
+
+.supports-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 560px) {
+  .supports-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.support-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 1rem;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.support-card:hover {
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+.support-card:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.support-card:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.support-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 0.35rem;
+  border-radius: 0.75rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+}
+
+.support-title {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.support-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.check-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  color: var(--button-text);
+  background: var(--accent);
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.support-card:has(input:checked) .check-badge {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---- Learning preference (single-select radio group) ---- */
+
+.preference-fieldset {
+  min-inline-size: 0;
+  margin: 2rem 0 0;
+  padding: 0;
+  border: none;
+}
+
+.preference-fieldset legend {
+  padding: 0;
+}
+
+.preference-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .preference-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.preference-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.85rem 0.5rem;
+  text-align: center;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 0.9rem;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.preference-pill:hover {
+  border-color: var(--accent-border);
+}
+
+.preference-pill:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.preference-pill:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.preference-title {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.preference-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* ---- Continue action ---- */
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
