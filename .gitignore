@@ -1,3 +1,8 @@
+# Local environment files (keep AI credentials out of Git)
+.env
+.env.*
+!.env.example
+
 # Logs
 logs
 *.log

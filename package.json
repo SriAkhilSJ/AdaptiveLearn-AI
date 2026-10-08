@@ -4,10 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k -n API,WEB -c cyan,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node --env-file-if-exists=.env server/index.mjs",
+    "dev:web": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "start": "node --env-file-if-exists=.env server/index.mjs --serve-static",
+    "preview": "npm run start",
+    "test": "node --test server/services/*.test.mjs server/providers/*.test.mjs",
+    "lint": "oxlint"
   },
   "dependencies": {
     "lucide-react": "^1.53.0",
@@ -20,6 +24,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "concurrently": "^10.0.6",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"

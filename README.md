@@ -8,41 +8,63 @@ adapt text, audio, visuals, and learning methods to different student needs.
 ## Tech stack
 
 - Vite + React + TypeScript
-- lucide-react (icons)
-- pdfjs-dist (client-side PDF text extraction)
+- Node.js API/service layer
+- OpenAI-compatible provider adapter (server-side)
+- PDF.js for local PDF text extraction
+- lucide-react for icons
 
 ## Work log
 
-- **Work #1 — Base web app** ✅ — Project scaffolded; landing screen running,
-  with a light/dark theme toggle (defaults to OS preference, choice persisted).
-- **Work #2 — Student Accessibility Profile** ✅ — Multi-select support cards
-  (easy-to-read text, audio, visual, step-by-step, larger text, repetition) +
-  single-choice learning preference (text/audio/visual/mixed). Saved to
-  localStorage. These are learning preferences only — the app never diagnoses.
-- **Work #3 — Student Dashboard** ✅ — "Welcome back!" screen showing the
-  saved learning preferences (with Edit), a Start a New Lesson section with
-  Start Lesson + Upload Lesson buttons, and a Recent Lessons list (uploads
-  are remembered locally). No AI yet.
+- **Work #1 — Base web app** ✅ — Landing screen and light/dark theme toggle.
+- **Work #2 — Student Accessibility Profile** ✅ — Multi-select learning
+  supports and a text/audio/visual/mixed preference, saved locally. These are
+  learning preferences only — the app does not diagnose.
+- **Work #3 — Student Dashboard** ✅ — Shows saved preferences and recent lessons.
 - **Work #4 — PDF lesson upload** ✅ — Drag-and-drop or browse for a PDF;
-  PDF.js extracts selectable text locally in the browser, shows the file name,
-  size, page/word count, and an optional text preview. No AI generation.
-- **Work #5 — Adaptive lessons** ⏭️ — Next: lessons that adapt text, audio,
-  and visuals to the saved profile.
+  PDF.js extracts selectable text locally in the browser.
+- **Work #5 — Adaptive Learning Engine** ✅ — Sends the extracted lesson and
+  saved preferences to a server-side AI provider and displays standard,
+  easy-to-read, step-by-step, visual, audio-ready, and personalized lesson
+  versions. The API key is read only by the Node server from an environment
+  variable; no key is included in the browser bundle.
 
 ## Getting started
 
 ```bash
 npm install
+cp .env.example .env
+```
+
+Set `AI_API_KEY` in your local `.env` file, then run:
+
+```bash
 npm run dev
 ```
 
-Then open the URL shown in the terminal (default: http://localhost:5173).
+The dev command starts both the Vite app and the Node API. Open the URL shown
+by Vite (default: http://localhost:5173). If no key is configured, the app
+still starts and explains how to configure the AI service when adaptation is
+requested. **Never use a `VITE_` prefix for secret keys and never commit `.env`.**
+
+PDF text and selected learning preferences are sent to the configured AI
+provider only when the student chooses **Generate adaptations**. Scanned PDFs
+without selectable text are not OCR'd.
+
+## Changing the AI provider
+
+The browser calls the same-origin `/api/adapt` endpoint. Provider details live
+behind the `generate({ messages })` adapter interface in `server/providers/`.
+The current adapter accepts an OpenAI-compatible Chat Completions endpoint;
+set `AI_PROVIDER`, `AI_BASE_URL`, `AI_MODEL`, and `AI_API_KEY` in the server
+environment. To add a provider with a different protocol, implement the same
+adapter interface and register it in `server/providers/index.mjs`.
 
 ## Scripts
 
-| Command           | Description                              |
-| ----------------- | ---------------------------------------- |
-| `npm run dev`     | Start the dev server                     |
-| `npm run build`   | Type-check and build for production      |
-| `npm run preview` | Preview the production build             |
-| `npm run lint`    | Lint with oxlint                         |
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite app and Node API together |
+| `npm run build` | Type-check and build the client |
+| `npm start` | Serve the built client and API |
+| `npm run test` | Run provider and adaptation-service tests |
+| `npm run lint` | Lint with oxlint |

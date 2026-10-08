@@ -4,13 +4,16 @@ import { Landing } from './components/Landing'
 import { AccessibilityProfile } from './components/AccessibilityProfile'
 import { Dashboard } from './components/Dashboard'
 import { UploadLesson } from './components/UploadLesson'
+import { AdaptiveLesson } from './components/AdaptiveLesson'
 import { loadProfile } from './lib/profile'
+import type { UploadedLesson } from './lib/adaptive'
 import './App.css'
 
-type View = 'landing' | 'profile' | 'dashboard' | 'upload'
+type View = 'landing' | 'profile' | 'dashboard' | 'upload' | 'adaptation'
 
 function App() {
   const [view, setView] = useState<View>('landing')
+  const [uploadedLesson, setUploadedLesson] = useState<UploadedLesson | null>(null)
 
   // Read on each render so the landing screen reflects the latest saved state.
   const savedProfile = loadProfile()
@@ -42,7 +45,16 @@ function App() {
       {view === 'upload' && (
         <UploadLesson
           onBack={() => setView('dashboard')}
-          onContinue={() => setView('dashboard')}
+          onContinue={(lesson) => {
+            setUploadedLesson(lesson)
+            setView('adaptation')
+          }}
+        />
+      )}
+      {view === 'adaptation' && uploadedLesson && (
+        <AdaptiveLesson
+          lesson={uploadedLesson}
+          onBack={() => setView('dashboard')}
         />
       )}
     </>

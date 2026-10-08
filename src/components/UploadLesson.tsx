@@ -10,6 +10,7 @@ import {
   UploadCloud,
 } from 'lucide-react'
 import { addRecentLesson } from '../lib/lessons'
+import type { UploadedLesson } from '../lib/adaptive'
 import {
   extractPdfText,
   PdfExtractionError,
@@ -24,7 +25,7 @@ type UploadStatus = 'ready' | 'extracting' | 'success'
 
 interface UploadLessonProps {
   onBack: () => void
-  onContinue: () => void
+  onContinue: (lesson: UploadedLesson) => void
 }
 
 function formatFileSize(bytes: number): string {
@@ -115,8 +116,13 @@ export function UploadLesson({ onBack, onContinue }: UploadLessonProps) {
   }
 
   const handleContinue = async () => {
-    if (status === 'success') {
-      onContinue()
+    if (status === 'success' && file && extracted) {
+      onContinue({
+        name: file.name,
+        size: file.size,
+        pageCount: extracted.pageCount,
+        text: extracted.text,
+      })
       return
     }
     if (!file || status === 'extracting') return
@@ -262,7 +268,7 @@ export function UploadLesson({ onBack, onContinue }: UploadLessonProps) {
             )}
           </button>
           {status === 'success' && (
-            <p className="continue-hint">Continue to return to your dashboard.</p>
+            <p className="continue-hint">Continue to personalize this lesson.</p>
           )}
         </div>
       </div>
