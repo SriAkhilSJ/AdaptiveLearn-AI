@@ -8,7 +8,16 @@ This guide prepares the AdaptiveLearn AI app for local development and first use
 - npm (included with Node.js)
 - An API key for an AI provider that supports the configured OpenAI-compatible Chat Completions API, if you want to generate adaptations
 
-Run these from the repository root — the directory containing `package.json`.
+## Clone this version
+
+This version is on the `arena/d3183c99-adaptivelearn-ai` branch. Clone that branch to get the dashboard, PDF upload, adaptive engine, and this setup guide:
+
+```bash
+git clone --branch arena/d3183c99-adaptivelearn-ai --single-branch https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git
+cd AdaptiveLearn-AI
+```
+
+Run the remaining commands from the repository root — the directory containing `package.json`.
 
 ## 1. Install dependencies
 
@@ -110,6 +119,6 @@ When asked to set up or verify this repository, the agent should:
 6. Do not call the real AI provider unless a key is already configured and a live provider request is explicitly requested. Use the existing mock-based tests for ordinary verification.
 7. Never commit `.env` or include any API key in client code, logs, screenshots, or documentation. Follow the repository's active branch and Git instructions.
 
-### Ready-to-use agent request
+### Ready-to-use Desktop Agent request
 
-> Read `Setup.md` and set up AdaptiveLearn AI for local development. Install dependencies if needed, run the test, lint, and build checks, start the app, and verify the frontend and API health endpoint. Do not ask me to paste credentials; do not put secrets in source or commit `.env`. If no AI key is configured, leave it blank and report that real generation needs a private local `AI_API_KEY`.
+> Clone the `arena/d3183c99-adaptivelearn-ai` branch from `https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git`, read `Setup.md`, and handle first-time setup end-to-end. Install dependencies; run `npm test`, `npm run lint`, and `npm run build`; start the app; and verify the frontend, `/api/health`, the PDF upload/extraction flow, and the Original Lesson → AI Adaptation → Personalized Lesson flow using a small text-based test PDF. Check that the saved learning preferences reach the adaptation service. Do not ask me to paste credentials. If no private `AI_API_KEY` is already configured, do not make a live provider request; use the existing mock-based tests and tell me live generation needs a private local key. Never expose or commit `.env`.
