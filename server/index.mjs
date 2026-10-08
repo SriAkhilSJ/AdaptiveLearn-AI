@@ -5,6 +5,7 @@ import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createAIProvider } from './providers/index.mjs'
 import { createAdaptationService } from './services/adaptation-service.mjs'
+import { createQuizService } from './services/quiz-service.mjs'
 
 const serveStatic = process.argv.includes('--serve-static')
 const port = Number(serveStatic ? process.env.PORT || 4173 : 8787)
@@ -13,6 +14,7 @@ const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const distDirectory = resolve(root, 'dist')
 const provider = createAIProvider()
 const adaptationService = createAdaptationService(provider)
+const quizService = createQuizService(provider)
 
 class HttpError extends Error {
   constructor(message, statusCode) {
@@ -125,6 +127,24 @@ const server = createServer(async (request, response) => {
         aiConfigured: provider.isConfigured,
         provider: provider.name,
       })
+      return
+    }
+
+    if (url.pathname === '/api/quiz') {
+      if (request.method !== 'POST') {
+        sendJson(response, 405, { error: 'Use POST to create a lesson quiz.' })
+        return
+      }
+      if (!provider.isConfigured) {
+        sendJson(response, 503, {
+          error: 'AI_API_KEY is not configured. Copy .env.example to .env, add your key, then restart the app.',
+        })
+        return
+      }
+
+      const input = await readJsonBody(request)
+      const quiz = await quizService.generate(input)
+      sendJson(response, 200, { quiz })
       return
     }
 

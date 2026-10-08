@@ -12,6 +12,7 @@ import {
   VolumeX,
 } from 'lucide-react'
 import type { LessonAdaptations, UploadedLesson } from '../lib/adaptive'
+import { LessonQuiz } from './LessonQuiz'
 import { VisualExplanation } from './VisualExplanation'
 import {
   getPreferenceTitle,
@@ -271,6 +272,8 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
             {speechMessage || 'Audio uses your browser’s built-in text-to-speech.'}
           </p>
         </section>
+
+        <LessonQuiz lesson={lesson} />
       </div>
     </main>
   )

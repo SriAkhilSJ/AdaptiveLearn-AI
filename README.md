@@ -28,6 +28,9 @@ adapt text, audio, visuals, and learning methods to different student needs.
   versions. The Personalized Learning screen switches between four formats
   and uses the browser Web Speech API to read the lesson aloud. The API key is
   read only by the Node server; no key is included in the browser bundle.
+- **Work #6 — Lesson Quiz** ✅ — Creates five multiple-choice questions from
+  the uploaded lesson, presents one question at a time with four choices and
+  progress, then reports the score and concepts to review.
 
 ## Getting started
 
@@ -46,12 +49,14 @@ npm run dev
 
 The dev command starts both the Vite app and the Node API. Open the URL shown
 by Vite (default: http://localhost:5173). If no key is configured, the app
-still starts and explains how to configure the AI service when adaptation is
-requested. **Never use a `VITE_` prefix for secret keys and never commit `.env`.**
+still starts and explains how to configure the AI service when adaptation or
+quiz generation is requested. **Never use a `VITE_` prefix for secret keys and
+never commit `.env`.**
 
 PDF text and selected learning preferences are sent to the configured AI
-provider only when the student chooses **Generate adaptations**. Scanned PDFs
-without selectable text are not OCR'd.
+provider only when the student chooses **Generate adaptations**. The lesson
+text is also sent to the provider only when the student chooses **Create quiz**.
+Scanned PDFs without selectable text are not OCR'd.
 
 ## Changing the AI provider
 
