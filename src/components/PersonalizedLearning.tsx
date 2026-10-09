@@ -12,6 +12,7 @@ import {
   VolumeX,
 } from 'lucide-react'
 import type { LessonAdaptations, UploadedLesson } from '../lib/adaptive'
+import { AudioTutor } from './AudioTutor'
 import { LessonQuiz } from './LessonQuiz'
 import { VisualExplanation } from './VisualExplanation'
 import {
@@ -42,7 +43,7 @@ const MODE_TITLES: Record<LessonMode, string> = {
   'easy-text': 'Easy Text',
   'step-by-step': 'Step-by-Step',
   visual: 'Visual Explanation',
-  audio: 'Audio-Ready Explanation',
+  audio: 'Audio Tutoring Session',
 }
 
 function SelectedPreferences({ profile }: { profile: AccessibilityProfile }) {
@@ -76,7 +77,7 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
     }
   }, [])
 
-  const stopSpeech = (message = 'Listening stopped.') => {
+  const stopSpeech = (message = 'Browser read-aloud stopped.') => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel()
     }
@@ -117,29 +118,35 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
   }
 
   const selectMode = (nextMode: LessonMode) => {
-    if (nextMode === mode) {
-      if (nextMode === 'audio' && !isSpeaking) {
-        speak(adaptations.audioReadyExplanation, 'Reading the audio-ready explanation aloud.')
-      }
-      return
-    }
-
-    if (isSpeaking) stopSpeech('Reading stopped because the lesson format changed.')
+    if (nextMode === mode) return
+    if (isSpeaking) stopSpeech('Browser read-aloud stopped because the lesson format changed.')
     setMode(nextMode)
-    if (nextMode === 'audio') {
-      speak(adaptations.audioReadyExplanation, 'Reading the audio-ready explanation aloud.')
-      return
-    }
-    setSpeechMessage(`Showing ${MODE_TITLES[nextMode]}.`)
+    setSpeechMessage(nextMode === 'audio'
+      ? 'Live audio tutoring is separate from browser read-aloud.'
+      : `Showing ${MODE_TITLES[nextMode]}.`)
   }
 
-  const handleListen = () => {
+  const getCurrentModeText = () => {
+    if (mode === 'personalized') return adaptations.personalizedLesson
+    if (mode === 'easy-text') return adaptations.easyToReadExplanation
+    if (mode === 'step-by-step') return adaptations.stepByStepExplanation.join('\n')
+    if (mode === 'visual') {
+      return [
+        adaptations.visualExplanation.title,
+        adaptations.visualExplanation.summary,
+        ...adaptations.visualExplanation.items.map((item) => `${item.label}: ${item.details.join('. ')}`),
+      ].filter(Boolean).join('. ')
+    }
+    return ''
+  }
+
+  const handleReadAloud = () => {
     if (isSpeaking) {
       stopSpeech()
       return
     }
-    setMode('audio')
-    speak(adaptations.audioReadyExplanation, 'Reading the audio-ready explanation aloud.')
+    const text = getCurrentModeText()
+    if (text) speak(text, 'Reading the visible lesson with your browser voice. This is separate from live tutoring.')
   }
 
   const handleSimpler = () => selectMode('easy-text')
@@ -148,7 +155,7 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
     setMode('step-by-step')
     speak(
       adaptations.stepByStepExplanation.join('\n'),
-      'Explaining the lesson again, one step at a time.',
+      'Reading the steps aloud with your browser voice.',
     )
   }
 
@@ -216,24 +223,9 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
               <h3 id="active-lesson-heading">{MODE_TITLES[mode]}</h3>
             </div>
 
-            {mode === 'audio' && (
-              <div className="audio-playback-panel">
-                <button
-                  type="button"
-                  className="audio-playback-button"
-                  aria-pressed={isSpeaking}
-                  onClick={handleListen}
-                >
-                  {isSpeaking ? <VolumeX size={19} aria-hidden="true" /> : <Volume2 size={19} aria-hidden="true" />}
-                  {isSpeaking ? 'Stop audio' : 'Play audio'}
-                </button>
-                <p className="audio-playback-hint">
-                  Uses your browser’s built-in voice. The text below stays visible as a transcript.
-                </p>
-              </div>
-            )}
-
-            {mode === 'step-by-step' ? (
+            {mode === 'audio' ? (
+              <AudioTutor lesson={lesson} adaptations={adaptations} profile={profile} />
+            ) : mode === 'step-by-step' ? (
               <ol className="learning-step-list">
                 {adaptations.stepByStepExplanation.map((step, index) => (
                   <li key={`${index}-${step.slice(0, 24)}`}>{step}</li>
@@ -245,37 +237,40 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
               <div className="learning-prose">
                 {mode === 'personalized' && adaptations.personalizedLesson}
                 {mode === 'easy-text' && adaptations.easyToReadExplanation}
-                {mode === 'audio' && adaptations.audioReadyExplanation}
               </div>
             )}
           </article>
 
-          <div className="learning-actions" role="group" aria-label="Lesson actions">
-            <button
-              type="button"
-              className="learning-action-button listen-button"
-              aria-pressed={isSpeaking}
-              onClick={handleListen}
-            >
-              {isSpeaking ? <VolumeX size={18} aria-hidden="true" /> : <Volume2 size={18} aria-hidden="true" />}
-              {isSpeaking ? 'Stop Listening' : 'Listen'}
-            </button>
-            <button type="button" className="learning-action-button" onClick={handleSimpler}>
-              <Type size={18} aria-hidden="true" />
-              Explain More Simply
-            </button>
-            <button type="button" className="learning-action-button" onClick={handleShowVisual}>
-              <ImageIcon size={18} aria-hidden="true" />
-              Show Visual
-            </button>
-            <button type="button" className="learning-action-button" onClick={handleExplainAgain}>
-              <MessageCircle size={18} aria-hidden="true" />
-              Explain Again
-            </button>
-          </div>
-          <p className="speech-status" role="status" aria-live="polite">
-            {speechMessage || 'Audio uses your browser’s built-in text-to-speech.'}
-          </p>
+          {mode !== 'audio' && (
+            <div className="learning-actions" role="group" aria-label="Lesson actions">
+              <button
+                type="button"
+                className="learning-action-button listen-button"
+                aria-pressed={isSpeaking}
+                onClick={handleReadAloud}
+              >
+                {isSpeaking ? <VolumeX size={18} aria-hidden="true" /> : <Volume2 size={18} aria-hidden="true" />}
+                {isSpeaking ? 'Stop browser read-aloud' : 'Read aloud (browser voice)'}
+              </button>
+              <button type="button" className="learning-action-button" onClick={handleSimpler}>
+                <Type size={18} aria-hidden="true" />
+                Explain More Simply
+              </button>
+              <button type="button" className="learning-action-button" onClick={handleShowVisual}>
+                <ImageIcon size={18} aria-hidden="true" />
+                Show Visual
+              </button>
+              <button type="button" className="learning-action-button" onClick={handleExplainAgain}>
+                <MessageCircle size={18} aria-hidden="true" />
+                Explain Again
+              </button>
+            </div>
+          )}
+          {mode !== 'audio' && (
+            <p className="speech-status" role="status" aria-live="polite">
+              {speechMessage || 'Browser read-aloud uses your device voice; it is separate from live audio tutoring.'}
+            </p>
+          )}
         </section>
 
         <LessonQuiz lesson={lesson} explanationStyle={profile.explanationStyle} />

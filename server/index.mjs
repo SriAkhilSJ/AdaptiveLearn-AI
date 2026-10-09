@@ -7,6 +7,7 @@ import { createAIProvider } from './providers/index.mjs'
 import { createAdaptationService } from './services/adaptation-service.mjs'
 import { createQuizService } from './services/quiz-service.mjs'
 import { createQuizFeedbackService } from './services/quiz-feedback-service.mjs'
+import { createAudioSessionService } from './services/audio-session-service.mjs'
 
 const serveStatic = process.argv.includes('--serve-static')
 const port = Number(serveStatic ? process.env.PORT || 4173 : 8787)
@@ -17,6 +18,9 @@ const provider = createAIProvider()
 const adaptationService = createAdaptationService(provider)
 const quizService = createQuizService(provider)
 const quizFeedbackService = createQuizFeedbackService(provider)
+const audioSessionService = createAudioSessionService({
+  aiConfigured: () => provider.isConfigured,
+})
 
 class HttpError extends Error {
   constructor(message, statusCode) {
@@ -129,6 +133,26 @@ const server = createServer(async (request, response) => {
         aiConfigured: provider.isConfigured,
         provider: provider.name,
       })
+      return
+    }
+
+    if (url.pathname === '/api/audio/status') {
+      if (request.method !== 'GET') {
+        sendJson(response, 405, { error: 'Use GET to check audio tutor setup.' })
+        return
+      }
+      sendJson(response, 200, audioSessionService.getStatus())
+      return
+    }
+
+    if (url.pathname === '/api/audio/session') {
+      if (request.method !== 'POST') {
+        sendJson(response, 405, { error: 'Use POST to start an audio tutoring session.' })
+        return
+      }
+      const input = await readJsonBody(request)
+      const session = await audioSessionService.createSession(input)
+      sendJson(response, 200, { session })
       return
     }
 

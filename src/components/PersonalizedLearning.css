@@ -187,50 +187,6 @@
   line-height: 1.65;
 }
 
-.audio-playback-panel {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.9rem;
-  padding: 0.8rem;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-border);
-  border-radius: 0.8rem;
-}
-
-.audio-playback-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-height: 2.9rem;
-  padding: 0.65rem 1rem;
-  color: var(--button-text);
-  background: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 0.7rem;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.audio-playback-button:hover {
-  filter: brightness(1.08);
-}
-
-.audio-playback-hint {
-  flex: 1 1 14rem;
-  margin: 0;
-  color: var(--text);
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-.lesson-content-large .audio-playback-hint {
-  font-size: 0.95rem;
-}
-
 .learning-step-list {
   display: grid;
   gap: 0.65rem;

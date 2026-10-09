@@ -10,10 +10,17 @@
     "build": "tsc -b && vite build",
     "start": "node --env-file-if-exists=.env server/index.mjs --serve-static",
     "preview": "npm run start",
-    "test": "node --test server/services/*.test.mjs server/providers/*.test.mjs src/lib/*.test.mjs",
-    "lint": "oxlint"
+    "test": "node --test server/*.test.mjs server/services/*.test.mjs server/providers/*.test.mjs src/lib/*.test.mjs",
+    "lint": "oxlint",
+    "dev:audio-agent": "node --env-file-if-exists=.env server/audio-agent.mjs dev",
+    "start:audio-agent": "node --env-file-if-exists=.env server/audio-agent.mjs start"
   },
   "dependencies": {
+    "@livekit/agents": "^1.9.1",
+    "@livekit/agents-plugin-deepgram": "^1.9.1",
+    "@livekit/agents-plugin-openai": "^1.9.1",
+    "livekit-client": "^2.22.3",
+    "livekit-server-sdk": "^2.19.1",
     "lucide-react": "^1.53.0",
     "pdfjs-dist": "^6.4.299",
     "react": "^19.2.8",
@@ -30,5 +37,8 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
   }
 }
