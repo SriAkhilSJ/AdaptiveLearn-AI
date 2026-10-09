@@ -157,7 +157,7 @@ export function AccessibilityProfile({
           />
           <div className="explanation-style-footer">
             <p id="explanation-style-help">
-              Your style guides the personalized lesson and audio-ready explanation. The lesson’s facts still come from the PDF.
+              Your style guides the personalized lesson, audio-ready explanation, and live audio tutor. The lesson’s facts still come from the PDF.
             </p>
             <p id="explanation-style-count" className="explanation-style-count">
               {profile.explanationStyle.length} / 160
