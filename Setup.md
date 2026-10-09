@@ -249,7 +249,7 @@ npm run start:audio-agent # Start the audio worker in production mode
 - **“The image service could not be reached”** — For self-hosting, confirm the local image server is running and reachable at `IMAGE_BASE_URL`, then retry one panel.
 - **“No selectable text was found”** — This PDF is likely scanned or image-only. Use a text-based PDF; OCR is not included.
 - **Lesson too long** — The current adaptation and audio-context limits are 60,000 extracted characters.
-- **Port already in use** — Stop the other app using port `5173` (Vite) or `8787` (development API), or free that port before starting the app.
+- **Port already in use** — Stop the other app using port `5173` (Vite) or `8787` (development API), or free that port before starting the app. If `npm run dev` crashes with `EADDRINUSE 0.0.0.0:8787`, a previous copy of this app (possibly from another session) is still holding the API port — the development API port is fixed at 8787. Find it with `lsof -i :8787` (macOS/Linux) or `netstat -ano | findstr 8787` (Windows), stop that process, then start again.
 
 ## Instructions for a coding agent
 
