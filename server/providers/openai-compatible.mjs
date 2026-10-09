@@ -46,7 +46,9 @@ export function createOpenAICompatibleProvider({
             max_tokens: 8000,
             response_format: { type: 'json_object' },
           }),
-          signal: AbortSignal.timeout(90_000),
+          // Some providers answer far slower than the default model; allow them
+          // enough time before reporting a timeout to the student.
+          signal: AbortSignal.timeout(300_000),
         })
       } catch (cause) {
         if (cause?.name === 'TimeoutError' || cause?.name === 'AbortError') {

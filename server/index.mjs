@@ -229,7 +229,7 @@ const server = createServer(async (request, response) => {
   }
 })
 
-server.requestTimeout = 120_000
+server.requestTimeout = 330_000 // Must stay above the provider fetch timeout.
 server.headersTimeout = 30_000
 server.listen(port, '0.0.0.0', () => {
   const mode = serveStatic ? 'production app + API' : 'API'
