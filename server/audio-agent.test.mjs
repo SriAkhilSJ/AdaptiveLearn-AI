@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildAudioTutorInstructions, parseAudioTutorContext } from './audio-agent.mjs'
+import audioAgent, { audioAgent as namedAudioAgent, buildAudioTutorInstructions, parseAudioTutorContext } from './audio-agent.mjs'
+
+test('exports the worker entrypoint as LiveKit’s default agent', () => {
+  assert.equal(audioAgent, namedAudioAgent)
+})
 
 const metadata = JSON.stringify({
   lesson: {

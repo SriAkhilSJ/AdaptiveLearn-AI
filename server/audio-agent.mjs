@@ -185,6 +185,9 @@ export const audioAgent = defineAgent({
   },
 })
 
+// LiveKit's job process imports the configured agent module's default export.
+export default audioAgent
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   assertAudioAgentConfiguration()
   cli.runApp(new ServerOptions({
