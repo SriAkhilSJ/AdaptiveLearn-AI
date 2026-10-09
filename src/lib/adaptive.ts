@@ -1,4 +1,5 @@
 import type { AccessibilityProfile } from './profile'
+import { QUESTION_DIFFICULTIES, type QuestionDifficulty } from './quiz-difficulty.mjs'
 
 export interface UploadedLesson {
   name: string
@@ -7,10 +8,11 @@ export interface UploadedLesson {
   text: string
 }
 
-export type VisualLayout = 'flow' | 'stack' | 'comparison'
+export type VisualLayout = 'flow' | 'cycle' | 'stack' | 'comparison'
 
 export interface VisualExplanation {
   title: string
+  summary: string
   layout: VisualLayout
   items: Array<{
     label: string
@@ -33,6 +35,7 @@ export interface LessonQuizQuestion {
   correctIndex: number
   concept: string
   explanation: string
+  difficulty: QuestionDifficulty
 }
 
 export interface LessonQuiz {
@@ -125,7 +128,17 @@ export async function requestLessonQuiz(lesson: UploadedLesson): Promise<LessonQ
   if (!response.ok) {
     throw new Error(payload.error || 'The quiz could not be created. Please try again.')
   }
-  if (!payload.quiz || !Array.isArray(payload.quiz.questions) || payload.quiz.questions.length !== 5) {
+  if (
+    !payload.quiz ||
+    !Array.isArray(payload.quiz.questions) ||
+    payload.quiz.questions.length !== 5 ||
+    payload.quiz.questions.some(
+      (question) =>
+        typeof question !== 'object' ||
+        question === null ||
+        !QUESTION_DIFFICULTIES.includes(question.difficulty),
+    )
+  ) {
     throw new Error('The AI service returned an incomplete quiz. Please try again.')
   }
   return payload.quiz
@@ -136,6 +149,7 @@ export async function requestLessonQuizFeedback(
   lesson: UploadedLesson,
   question: LessonQuizQuestion,
   incorrectAnswer: string,
+  explanationStyle = '',
 ): Promise<LessonQuizFeedback> {
   let response: Response
   try {
@@ -150,6 +164,7 @@ export async function requestLessonQuizFeedback(
           concept: question.concept,
         },
         incorrectAnswer,
+        explanationStyle,
       }),
     })
   } catch {

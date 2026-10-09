@@ -55,6 +55,11 @@ function SelectedPreferences({ profile }: { profile: AccessibilityProfile }) {
           {support}
         </span>
       ))}
+      {profile.explanationStyle.trim() && (
+        <span className="adaptation-preference-chip adaptation-style-chip">
+          Explain it like: {profile.explanationStyle}
+        </span>
+      )}
       {supports.length === 0 && (
         <span className="adaptation-preference-chip">No extra supports selected</span>
       )}
@@ -73,7 +78,7 @@ export function AdaptiveLesson({
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const preferenceCount = profile.supports.length + (profile.preference ? 1 : 0)
+  const preferenceCount = profile.supports.length + (profile.preference ? 1 : 0) + (profile.explanationStyle.trim() ? 1 : 0)
   const preview = lesson.text.slice(0, 5000)
   const hasMoreSource = lesson.text.length > 5000
 
@@ -161,7 +166,7 @@ export function AdaptiveLesson({
             </div>
           </div>
           <p className="adaptive-description">
-            Generate five explanation formats. Your saved preferences guide the final lesson.
+            Generate five formats. Your saved preferences and optional story style guide the personalized lesson and audio-ready explanation.
           </p>
           <SelectedPreferences profile={profile} />
 

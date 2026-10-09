@@ -10,6 +10,7 @@ const quiz = {
       correctIndex: 1,
       concept: 'Evaporation',
       explanation: 'The lesson says heat changes liquid water into vapor.',
+      difficulty: 'easy',
     },
     {
       question: 'Where does water vapor collect?',
@@ -17,6 +18,7 @@ const quiz = {
       correctIndex: 0,
       concept: 'Cloud formation',
       explanation: 'Water vapor cools and forms clouds.',
+      difficulty: 'easy',
     },
     {
       question: 'What is precipitation?',
@@ -24,6 +26,7 @@ const quiz = {
       correctIndex: 2,
       concept: 'Precipitation',
       explanation: 'Rain is water that falls from clouds.',
+      difficulty: 'medium',
     },
     {
       question: 'What happens after water reaches the ground?',
@@ -31,6 +34,7 @@ const quiz = {
       correctIndex: 1,
       concept: 'Collection',
       explanation: 'The lesson describes water collecting before the cycle repeats.',
+      difficulty: 'medium',
     },
     {
       question: 'Which process begins the cycle?',
@@ -38,6 +42,7 @@ const quiz = {
       correctIndex: 3,
       concept: 'Water-cycle sequence',
       explanation: 'The sequence begins when heat causes evaporation.',
+      difficulty: 'hard',
     },
   ],
 }
@@ -65,6 +70,7 @@ test('creates five validated questions from the uploaded lesson', async () => {
   const userMessage = JSON.parse(request.messages[1].content)
   assert.equal(userMessage.sourceLessonText, lesson.lesson.text)
   assert.match(request.messages[0].content, /exactly 5 distinct multiple-choice questions/i)
+  assert.match(request.messages[0].content, /exactly 2 easy, 2 medium, and 1 hard/i)
 })
 
 test('accepts a JSON-fenced provider response', async () => {
@@ -103,6 +109,20 @@ test('rejects model output with a question count other than five', async () => {
   const service = createQuizService({
     generate: async () => JSON.stringify({ questions: quiz.questions.slice(0, 4) }),
   })
+  await assert.rejects(service.generate(lesson), /incomplete quiz/i)
+})
+
+test('rejects difficulty metadata that does not contain two easy, two medium, and one hard question', async () => {
+  const malformedQuiz = structuredClone(quiz)
+  malformedQuiz.questions[4].difficulty = 'medium'
+  const service = createQuizService({ generate: async () => JSON.stringify(malformedQuiz) })
+  await assert.rejects(service.generate(lesson), /incomplete quiz/i)
+})
+
+test('rejects an unknown question difficulty', async () => {
+  const malformedQuiz = structuredClone(quiz)
+  malformedQuiz.questions[0].difficulty = 'expert'
+  const service = createQuizService({ generate: async () => JSON.stringify(malformedQuiz) })
   await assert.rejects(service.generate(lesson), /incomplete quiz/i)
 })
 

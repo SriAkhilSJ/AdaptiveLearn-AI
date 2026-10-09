@@ -68,6 +68,12 @@
   font-weight: 600;
 }
 
+.learning-style-chip {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  border-radius: 0.65rem;
+}
+
 .format-card > .section-title {
   margin-bottom: 0.75rem;
 }

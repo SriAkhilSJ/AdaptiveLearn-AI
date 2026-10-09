@@ -48,7 +48,7 @@ AI_MODEL=gpt-4o-mini
 
 Use the provider's actual key and endpoint. **Keep the key private:** do not paste it into chat, source files, browser code, or commit it to Git. `.env` is ignored by Git. Never rename it to a `VITE_...` variable; Vite variables are exposed to browser code. The Node API reads the key on the server.
 
-The app can start without a key, but **Generate adaptations** will show a setup message until `AI_API_KEY` is configured. Restart `npm run dev` after changing `.env`.
+The app can start without a key, but lesson adaptation, quiz generation, and quiz feedback will show a setup message until `AI_API_KEY` is configured. Restart `npm run dev` after changing `.env`.
 
 ## 3. Start the app
 
@@ -68,17 +68,17 @@ A configured server responds with `"aiConfigured":true`. If it is `false`, check
 
 ## 4. Try the student flow
 
-1. Open **Start Learning**. Choose learning supports and a learning preference, then select **Continue**.
+1. Open **Start Learning**. Choose learning supports and a learning preference. Optionally enter a story/personification request in **Explain it like…** (for example, “a One Piece anime adventure”), then select **Continue**.
 2. From the dashboard, select **Start Lesson** or **Upload Lesson**.
 3. Browse for or drag in a PDF, then select **Continue** to extract its text.
 4. After the upload succeeds, select **Continue** to open the adaptation screen.
 5. Review **Original Lesson → AI Adaptation → Personalized Lesson**, then select **Generate adaptations**.
 6. Select **Start Personalized Learning**. Switch among **Easy Text**, **Step-by-Step**, **Visual**, and **Audio**. Selecting **Audio** starts the browser's built-in voice; use its **Play audio / Stop audio** control or the **Listen** action to control playback. Use **Explain More Simply** for easy text, **Show Visual** for the diagram, or **Explain Again** to hear the step-by-step version.
-7. Select **Create quiz** in **Check your understanding**. Answer five multiple-choice questions one at a time; use **Next** and the progress bar to move through the quiz. An incorrect answer triggers a simpler explanation, a visual diagram, a small example, and a retry. At the end, review your first-attempt score and the concepts for any missed answers.
+7. Select **Create quiz** in **Check your understanding**. The five generated questions include two Easy, two Medium, and one Hard question. The target starts at Medium; after three consecutive correct first answers it rises one level, and after two consecutive incorrect first answers it drops one level. Each next question is the unused question closest to the current target. Use **Previous** to review: once submitted, a first answer is locked and revisits do not change the score or difficulty. An incorrect answer triggers a simpler explanation, a visual diagram, a small example, and an optional practice retry; retries do not affect score or difficulty. At the end, review the first-attempt score and concepts for missed answers.
 
-The engine returns standard, easy-to-read, step-by-step, visual, and audio-ready explanations, plus a personalized lesson based on the saved preferences. The visual version is a concise card-based diagram. Audio uses the browser's Web Speech API and leaves the text visible as a transcript; available voices depend on the browser and device. If speech synthesis is unsupported, the lesson remains available to read on screen.
+The engine returns standard, easy-to-read, step-by-step, visual, and audio-ready explanations, plus a personalized lesson based on saved preferences. The optional **Explain it like…** request currently shapes the personalized lesson, audio-ready wording, and quiz remediation; it does not generate video yet. The visual version remains a concise whole-lesson diagram. Audio-ready text is a short spoken overview, read by the browser's Web Speech API with a visible transcript. Available voices depend on the browser and device.
 
-PDF text and saved learning preferences are sent to the configured AI provider only after the student chooses **Generate adaptations**. The uploaded lesson text is also sent to the configured provider only when **Create quiz** is selected. After an incorrect response, the lesson text, question, and selected answer are sent to generate the targeted feedback. PDF text extraction happens locally in the browser. Scanned/image-only PDFs are not OCR'd.
+PDF text, saved learning preferences, and the optional explanation-style request are sent to the configured AI provider only after the student chooses **Generate adaptations**. The uploaded lesson text is also sent to the configured provider only when **Create quiz** is selected. After an incorrect response, the lesson text, question, selected answer, and optional style are sent to generate targeted feedback. PDF text extraction happens locally in the browser. Scanned/image-only PDFs are not OCR'd.
 
 ## File and text limits
 
@@ -86,13 +86,13 @@ PDF text and saved learning preferences are sent to the configured AI provider o
 - AI adaptation request: maximum **60,000 extracted characters**
 - The PDF must contain selectable text; image-only/scanned PDFs need OCR, which is not included
 
-Recent lesson names and accessibility preferences are stored in this browser. The currently uploaded lesson text is kept in the active app session for the adaptation flow.
+Recent lesson names, accessibility preferences, and the optional explanation-style request are stored in this browser. The currently uploaded lesson text is kept in the active app session for the adaptation flow.
 
 ## Useful commands
 
 ```bash
 npm run dev       # Start frontend and API together
-npm test          # Run AI provider and adaptation-service tests
+npm test          # Run AI provider, lesson service, quiz, and difficulty tests
 npm run lint      # Run oxlint
 npm run build     # Type-check and build the frontend
 npm start         # Serve the production build and API (run build first)
@@ -123,4 +123,4 @@ When asked to set up or verify this repository, the agent should:
 
 ### Ready-to-use Desktop Agent request
 
-> Clone the `arena/d3183c99-adaptivelearn-ai` branch from `https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git`, read `Setup.md`, and handle first-time setup end-to-end. Install dependencies; run `npm test`, `npm run lint`, and `npm run build`; start the app; and verify the frontend, `/api/health`, the PDF upload/extraction flow, and the Original Lesson → AI Adaptation → Personalized Learning flow using a small text-based test PDF. Check that saved preferences reach the adaptation service, the four format controls work, and Audio/Listen/Explain Again use browser speech or show the supported fallback. Verify the lesson quiz presents exactly five questions one at a time, four answer choices, progress and Next controls, adaptive simpler/visual/example feedback with a retry after a wrong answer, a final first-attempt score out of five, and missed concepts. Do not ask me to paste credentials. If no private `AI_API_KEY` is already configured, do not make a live provider request; use the existing mock-based tests and tell me live generation needs a private local key. Never expose or commit `.env`.
+> Clone the `arena/d3183c99-adaptivelearn-ai` branch from `https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git`, read `Setup.md`, and handle first-time setup end-to-end. Install dependencies; run `npm test`, `npm run lint`, and `npm run build`; start the app; and verify the frontend, `/api/health`, the PDF upload/extraction flow, and the Original Lesson → AI Adaptation → Personalized Learning flow using a small text-based test PDF. Check that saved preferences and the optional “Explain it like…” input reach the adaptation service; verify that the requested lens shapes the personalized lesson, audio-ready text, and quiz remediation without changing facts from the PDF. Confirm the four format controls work and Audio/Listen/Explain Again use browser speech or show the supported fallback. Do not claim the app generates video yet. Verify the lesson quiz presents exactly five questions one at a time with four answer choices and progress controls, with exactly two Easy, two Medium, and one Hard question; starts at Medium; raises the next-question target one level after three consecutive correct first answers and lowers it one level after two consecutive incorrect first answers; chooses the closest unused question; preserves locked first answers when using Previous; and keeps practice retries out of the score and difficulty streaks. Also verify simpler/visual/example feedback after a wrong answer, the final first-attempt score out of five, and missed concepts. Do not ask me to paste credentials. If no private `AI_API_KEY` is already configured, do not make a live provider request; use the existing mock-based tests and tell me live generation needs a private local key. Never expose or commit `.env`.

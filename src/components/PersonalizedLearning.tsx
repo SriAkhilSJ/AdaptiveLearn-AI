@@ -55,6 +55,11 @@ function SelectedPreferences({ profile }: { profile: AccessibilityProfile }) {
       {supports.map((support) => (
         <span key={support} className="learning-chip">{support}</span>
       ))}
+      {profile.explanationStyle.trim() && (
+        <span className="learning-chip learning-style-chip">
+          Explain it like: {profile.explanationStyle}
+        </span>
+      )}
     </div>
   )
 }
@@ -273,7 +278,7 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
           </p>
         </section>
 
-        <LessonQuiz lesson={lesson} />
+        <LessonQuiz lesson={lesson} explanationStyle={profile.explanationStyle} />
       </div>
     </main>
   )

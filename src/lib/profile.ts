@@ -21,11 +21,14 @@ export interface AccessibilityProfile {
   supports: SupportOptionId[]
   /** Single overall learning preference. */
   preference: LearningPreference | null
+  /** Optional free-form story/personification lens; not a diagnosis. */
+  explanationStyle: string
 }
 
 export const EMPTY_PROFILE: AccessibilityProfile = {
   supports: [],
   preference: null,
+  explanationStyle: '',
 }
 
 export const SUPPORT_OPTIONS: ReadonlyArray<{
@@ -88,7 +91,7 @@ export function loadProfile(): AccessibilityProfile {
     if (!raw) return EMPTY_PROFILE
     const parsed: unknown = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null) return EMPTY_PROFILE
-    const { supports, preference } = parsed as Record<string, unknown>
+    const { supports, preference, explanationStyle } = parsed as Record<string, unknown>
     return {
       supports: Array.isArray(supports)
         ? supports.filter(
@@ -100,6 +103,8 @@ export function loadProfile(): AccessibilityProfile {
         typeof preference === 'string' && PREFERENCE_VALUES.has(preference)
           ? (preference as LearningPreference)
           : null,
+      explanationStyle:
+        typeof explanationStyle === 'string' ? explanationStyle.slice(0, 160) : '',
     }
   } catch {
     return EMPTY_PROFILE

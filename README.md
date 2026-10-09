@@ -1,6 +1,6 @@
 # AdaptiveLearn AI
 
-**AI-Powered Personalized Learning for Students with Disabilities and Special Educational Needs**
+**AI-assisted lessons shaped around each learner’s preferences**
 
 Built for problem statement **PS-AI-02**: AI-assisted learning content that can
 adapt text, audio, visuals, and learning methods to different student needs.
@@ -8,6 +8,7 @@ adapt text, audio, visuals, and learning methods to different student needs.
 ## Tech stack
 
 - Vite + React + TypeScript
+- Tailwind CSS utilities alongside accessible CSS design tokens
 - Node.js API/service layer
 - OpenAI-compatible provider adapter (server-side)
 - PDF.js for local PDF text extraction
@@ -17,22 +18,32 @@ adapt text, audio, visuals, and learning methods to different student needs.
 
 - **Work #1 — Base web app** ✅ — Landing screen and light/dark theme toggle.
 - **Work #2 — Student Accessibility Profile** ✅ — Multi-select learning
-  supports and a text/audio/visual/mixed preference, saved locally. These are
-  learning preferences only — the app does not diagnose.
+  supports, a text/audio/visual/mixed preference, and an optional free-form
+  “Explain it like…” storytelling/personification style, saved locally. These
+  are learning preferences only — the app does not diagnose.
 - **Work #3 — Student Dashboard** ✅ — Shows saved preferences and recent lessons.
 - **Work #4 — PDF lesson upload** ✅ — Drag-and-drop or browse for a PDF;
   PDF.js extracts selectable text locally in the browser.
 - **Work #5 — Adaptive Learning Engine** ✅ — Sends the extracted lesson and
   saved preferences to a server-side AI provider and displays standard,
   easy-to-read, step-by-step, visual, audio-ready, and personalized lesson
-  versions. The Personalized Learning screen switches between four formats
-  and uses the browser Web Speech API to read the lesson aloud. The API key is
-  read only by the Node server; no key is included in the browser bundle.
+  versions. The visual view is a compact whole-lesson diagram: it summarizes
+  the main idea and uses sequence arrows, cycle arrows, layered blocks, or a
+  side-by-side comparison to show how ideas connect. The optional free-form
+  “Explain it like…” style guides the personalized lesson and audio-ready text.
+  The audio-ready view is a short spoken overview; the Personalized Learning
+  screen uses browser Web Speech to read it aloud. The API key is read only by
+  the Node server; no key is included in the browser bundle.
 - **Work #6 — Lesson Quiz** ✅ — Creates five multiple-choice questions from
   the uploaded lesson, presents one question at a time with four choices and
   progress, then reports the first-attempt score and concepts to review. Wrong
   answers trigger targeted, simpler and visual feedback, a small example, and
-  a retry.
+  a retry; the optional explanation style also guides written remediation.
+- **Work #7 — Adaptive Quiz Difficulty** ✅ — Starts at Medium, raises its
+  target after three consecutive correct first answers, and lowers it after two
+  consecutive incorrect first answers. The next unused question is selected
+  closest to the current target. Previous navigation preserves locked first
+  answers; practice retries do not affect the score or adaptive level.
 
 ## Getting started
 
@@ -55,9 +66,10 @@ still starts and explains how to configure the AI service when adaptation or
 quiz generation is requested. **Never use a `VITE_` prefix for secret keys and
 never commit `.env`.**
 
-PDF text and selected learning preferences are sent to the configured AI
-provider only when the student chooses **Generate adaptations**. The lesson
-text is also sent to the provider when the student chooses **Create quiz**; if
+PDF text, selected learning preferences, and the optional explanation-style
+request are sent to the configured AI provider only when the student chooses
+**Generate adaptations**. The lesson text is also sent to the provider when the
+student chooses **Create quiz**; if
 an answer is incorrect, the lesson, question, and selected answer are sent to
 generate targeted feedback. Scanned PDFs without selectable text are not OCR'd.
 
@@ -77,5 +89,5 @@ adapter interface and register it in `server/providers/index.mjs`.
 | `npm run dev` | Start the Vite app and Node API together |
 | `npm run build` | Type-check and build the client |
 | `npm start` | Serve the built client and API |
-| `npm run test` | Run provider and adaptation-service tests |
+| `npm run test` | Run provider, adaptation, quiz, and adaptive-difficulty tests |
 | `npm run lint` | Lint with oxlint |

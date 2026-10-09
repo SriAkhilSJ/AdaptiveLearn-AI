@@ -56,6 +56,10 @@ export function AccessibilityProfile({
     setProfile((current) => ({ ...current, preference: value }))
   }
 
+  const updateExplanationStyle = (explanationStyle: string) => {
+    setProfile((current) => ({ ...current, explanationStyle: explanationStyle.slice(0, 160) }))
+  }
+
   const handleContinue = () => {
     saveProfile(profile)
     onContinue()
@@ -130,6 +134,36 @@ export function AccessibilityProfile({
             ))}
           </div>
         </fieldset>
+
+        <section className="explanation-style-section" aria-labelledby="explanation-style-heading">
+          <h2 id="explanation-style-heading" className="section-title">
+            Story or personification style <span>(optional)</span>
+          </h2>
+          <p className="section-hint">
+            Tell us what kind of story, analogy, or teaching voice would make a lesson click for you.
+          </p>
+          <label className="explanation-style-label" htmlFor="explanation-style">
+            Explain it like…
+          </label>
+          <textarea
+            id="explanation-style"
+            className="explanation-style-input"
+            value={profile.explanationStyle}
+            onChange={(event) => updateExplanationStyle(event.target.value)}
+            maxLength={160}
+            rows={3}
+            placeholder="For example: Explain it like a One Piece anime adventure"
+            aria-describedby="explanation-style-help explanation-style-count"
+          />
+          <div className="explanation-style-footer">
+            <p id="explanation-style-help">
+              Your style guides the personalized lesson and audio-ready explanation. The lesson’s facts still come from the PDF.
+            </p>
+            <p id="explanation-style-count" className="explanation-style-count">
+              {profile.explanationStyle.length} / 160
+            </p>
+          </div>
+        </section>
 
         <div className="profile-actions">
           <button

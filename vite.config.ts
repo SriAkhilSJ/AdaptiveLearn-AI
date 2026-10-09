@@ -1,8 +1,9 @@
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [tailwindcss(), react()],
   server: {
     // Bind to all interfaces so the app is reachable in the live preview.
     host: '0.0.0.0',

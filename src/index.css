@@ -1,3 +1,9 @@
+/* Use Tailwind's theme and utility layers without its global preflight reset;
+   existing component styles keep their native form-control and heading behavior. */
+@layer theme, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
 /* Design tokens — tuned for WCAG AA contrast in both light and dark themes.
    The active theme is set as data-theme="light" | "dark" on <html>
    (see the inline script in index.html and src/components/ThemeToggle.tsx). */

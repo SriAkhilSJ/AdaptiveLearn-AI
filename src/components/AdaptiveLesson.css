@@ -187,6 +187,12 @@
   font-weight: 600;
 }
 
+.adaptation-style-chip {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  border-radius: 0.65rem;
+}
+
 .preference-reminder {
   max-width: none;
   margin: 0.8rem 0;
