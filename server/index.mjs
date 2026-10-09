@@ -4,7 +4,10 @@ import { createServer } from 'node:http'
 import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createAIProvider } from './providers/index.mjs'
+import { createImageProvider } from './providers/image-provider.mjs'
 import { createAdaptationService } from './services/adaptation-service.mjs'
+import { createComicImageService } from './services/comic-image-service.mjs'
+import { createComicStoryboardService } from './services/comic-storyboard-service.mjs'
 import { createQuizService } from './services/quiz-service.mjs'
 import { createQuizFeedbackService } from './services/quiz-feedback-service.mjs'
 import { createAudioSessionService } from './services/audio-session-service.mjs'
@@ -15,7 +18,10 @@ const maxBodyBytes = 1_000_000
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const distDirectory = resolve(root, 'dist')
 const provider = createAIProvider()
+const imageProvider = createImageProvider()
 const adaptationService = createAdaptationService(provider)
+const comicStoryboardService = createComicStoryboardService(provider)
+const comicImageService = createComicImageService(imageProvider)
 const quizService = createQuizService(provider)
 const quizFeedbackService = createQuizFeedbackService(provider)
 const audioSessionService = createAudioSessionService({
@@ -189,6 +195,46 @@ const server = createServer(async (request, response) => {
       const input = await readJsonBody(request)
       const quiz = await quizService.generate(input)
       sendJson(response, 200, { quiz })
+      return
+    }
+
+    if (url.pathname === '/api/comic/image-status') {
+      if (request.method !== 'GET') {
+        sendJson(response, 405, { error: 'Use GET to check comic illustration setup.' })
+        return
+      }
+      // Status reports variable names only; values never leave the server.
+      sendJson(response, 200, imageProvider.getStatus())
+      return
+    }
+
+    if (url.pathname === '/api/comic/storyboard') {
+      if (request.method !== 'POST') {
+        sendJson(response, 405, { error: 'Use POST to create a comic storyboard.' })
+        return
+      }
+      if (!provider.isConfigured) {
+        sendJson(response, 503, {
+          error: 'AI_API_KEY is not configured. Copy .env.example to .env, add your key, then restart the app.',
+        })
+        return
+      }
+
+      const input = await readJsonBody(request)
+      const storyboard = await comicStoryboardService.generate(input)
+      sendJson(response, 200, { storyboard })
+      return
+    }
+
+    if (url.pathname === '/api/comic/panel-image') {
+      if (request.method !== 'POST') {
+        sendJson(response, 405, { error: 'Use POST to generate a comic panel illustration.' })
+        return
+      }
+
+      const input = await readJsonBody(request)
+      const image = await comicImageService.generatePanelImage(input)
+      sendJson(response, 200, { image })
       return
     }
 

@@ -46,6 +46,16 @@ adapt text, audio, visuals, and learning methods to different student needs.
   consecutive incorrect first answers. The next unused question is selected
   closest to the current target. Previous navigation preserves locked first
   answers; practice retries do not affect the score or adaptive level.
+- **Work #9 — Accessible comic panels** ✅ — Personalized Learning’s **Visual**
+  mode now offers a learner-controlled comic: an explicitly created 3–5 panel
+  storyboard grounded in the uploaded lesson, with Previous/Next navigation,
+  “Panel X of N” announcements, visible captions, and meaningful alt text.
+  Nothing auto-advances. Each panel illustration is generated only on request
+  through a separate server-side image adapter; when no image provider is
+  configured, the app shows the full text storyboard and says so honestly
+  instead of faking artwork. The original overview diagram is still available
+  under “Show overview diagram” and unchanged in adaptation preview and quiz
+  feedback.
 - **Work #8 — Live audio tutor** 🚧 — Audio mode now opens a microphone-controlled,
   one-to-one LiveKit meeting with a lesson-grounded voice tutor, live transcript,
   and mute/end controls. Deepgram handles streaming speech recognition and
@@ -115,5 +125,5 @@ adapter interface and register it in `server/providers/index.mjs`.
 | `npm run build` | Type-check and build the client |
 | `npm start` | Serve the built client and API |
 | `npm run start:audio-agent` | Start the audio tutor worker in production mode |
-| `npm run test` | Run provider, adaptation, quiz, audio-session, and adaptive-difficulty tests |
+| `npm run test` | Run provider, adaptation, quiz, comic, audio-session, and adaptive-difficulty tests |
 | `npm run lint` | Lint with oxlint |

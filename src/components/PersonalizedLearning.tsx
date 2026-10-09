@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import type { LessonAdaptations, UploadedLesson } from '../lib/adaptive'
 import { AudioTutor } from './AudioTutor'
+import { ComicLesson } from './ComicLesson'
 import { LessonQuiz } from './LessonQuiz'
 import { VisualExplanation } from './VisualExplanation'
 import {
@@ -232,7 +233,17 @@ export function PersonalizedLearning({ lesson, adaptations, onBack }: Personaliz
                 ))}
               </ol>
             ) : mode === 'visual' ? (
-              <VisualExplanation explanation={adaptations.visualExplanation} />
+              <>
+                <ComicLesson
+                  lesson={lesson}
+                  explanationStyle={profile.explanationStyle}
+                  largeText={largeText}
+                />
+                <details className="visual-diagram-details">
+                  <summary>Show overview diagram</summary>
+                  <VisualExplanation explanation={adaptations.visualExplanation} />
+                </details>
+              </>
             ) : (
               <div className="learning-prose">
                 {mode === 'personalized' && adaptations.personalizedLesson}

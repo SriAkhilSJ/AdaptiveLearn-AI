@@ -102,6 +102,80 @@ curl http://localhost:5173/api/audio/status
 
 `configured: true` means the required environment variables are present. This is only a configuration check; it does **not** verify provider connectivity, agent availability, microphone permission, or audible playback. Audio service calls may incur provider usage charges.
 
+## Comic illustrations (optional)
+
+Personalized Learning's **Visual** mode always works without image setup: the learner creates a
+3–5 panel text storyboard (captions, dialogue, key ideas, alt text), navigates it panel by panel,
+and sees an explicit "illustration generation is not configured" message. Real panel artwork is an
+opt-in extra: each illustration is generated only when the learner requests that panel's art, one
+panel at a time. No image model is bundled with this repository, and the Chat Completions text
+endpoint is never assumed to generate images — artwork goes through a separate server-side image
+adapter (`server/providers/image-provider.mjs`) that speaks the OpenAI Images API shape
+(`POST {IMAGE_BASE_URL}/images/generations`, `response_format: b64_json`).
+
+Check the current setup without displaying any secret (names only):
+
+```bash
+curl http://localhost:5173/api/comic/image-status
+```
+
+`configured: true` means the required variables for the selected `IMAGE_PROVIDER` are present.
+
+### Option A — self-hosted image server (recommended if the laptop can run it)
+
+Point the adapter at a local server that exposes an OpenAI-compatible Images endpoint. One
+practical choice is [LocalAI](https://github.com/mudler/LocalAI) running a Stable
+Diffusion-family image model, but any server with the same endpoint shape works.
+
+```dotenv
+IMAGE_PROVIDER=local-openai-compatible
+IMAGE_BASE_URL=http://127.0.0.1:8080/v1
+IMAGE_MODEL=your-local-image-model-name
+IMAGE_API_KEY=
+```
+
+`IMAGE_API_KEY` may stay empty for a local server without authentication; it is only sent when
+set. Use your server's actual base URL and model name.
+
+**Licenses — read both before downloading anything.** The LocalAI server code is MIT-licensed
+(`LICENSE` in the `mudler/LocalAI` repository, verified via GitHub). The image **model weights**
+are separate artifacts under their own custom terms (Stable Diffusion-family weights use a
+custom Open RAIL-style license, not a standard open-source license — GitHub reports it as
+`NOASSERTION`/`Other`). Read the exact model card and license of the weights you download, and do
+not describe the whole image stack as open source. This repository itself has no `LICENSE` file,
+so its own licensing is not declared.
+
+**Hardware/runtime planning.** Image models are heavy: plan for a GPU with ample VRAM (8 GB class
+or more for XL-class models), roughly 10 GB of disk for weights, and Docker or the server's
+release binary. CPU-only generation usually works but can take many minutes per panel. These are
+planning rules of thumb — confirm current requirements in your image server's and model card's
+documentation before installing anything. There is no per-image fee for self-hosting, but real
+electricity and hardware costs apply.
+
+### Option B — hosted image endpoint (paid, needs your approval)
+
+Point the adapter at a hosted OpenAI Images-compatible endpoint. Every field is required:
+
+```dotenv
+IMAGE_PROVIDER=openai-compatible
+IMAGE_BASE_URL=https://api.openai.com/v1
+IMAGE_MODEL=your-hosted-image-model-name
+IMAGE_API_KEY=your-image-api-key
+```
+
+Hosted image calls typically cost money per image — check the provider's current pricing before
+enabling this, and treat it as a separate budget decision from the text model. Panel prompts leave
+your laptop and are subject to that provider's retention policies.
+
+### Illustration privacy and limits
+
+Each **Generate illustration** request sends only that panel's short scene description plus the
+story title to the image service — never the full lesson text. Responses must be PNG, JPEG, or
+WebP and at most 4 MB; anything else is rejected. Generated images are returned to the active
+browser session only and are not stored on the server. Like the audio endpoints, the comic
+endpoints have no student authentication or rate limits in this prototype, so keep the API private
+during laptop testing.
+
 ## 4. Start the web app
 
 If you have not already started it in step 3:
@@ -151,7 +225,7 @@ Recent lesson names, accessibility preferences, and the optional explanation-sty
 ```bash
 npm run dev              # Start frontend and API together
 npm run dev:audio-agent  # Start the LiveKit tutor worker for local development
-npm test                 # Run provider, lesson, quiz, audio-session, and difficulty tests
+npm test                 # Run provider, lesson, quiz, comic, audio-session, and difficulty tests
 npm run lint             # Run oxlint
 npm run build            # Type-check and build the frontend
 npm start                # Serve the production build and API (run build first)
@@ -170,6 +244,9 @@ npm run start:audio-agent # Start the audio worker in production mode
 - **No microphone permission or audio** — Use HTTPS or `localhost`, allow microphone access in the browser, check the selected microphone and speaker, and make sure audio is not muted by the operating system.
 - **LiveKit self-hosting** — A browser on another device cannot connect to the user's `localhost`; configure a reachable server URL and the needed network/firewall access.
 - **The AI provider cannot be reached** — Check the endpoint, internet/network access, and provider status. The server must be able to reach the provider.
+- **“Illustration generation is not configured”** — Visual mode is working as designed in text-only form. To enable real artwork, set the named `IMAGE_*` values in the server-side `.env` (see “Comic illustrations” above), restart with `npm run dev`, and check `/api/comic/image-status`. The status lists missing variable names only.
+- **“The image service rejected the configured key”** — Check `IMAGE_API_KEY` against the image endpoint (not the text-model key), plus `IMAGE_BASE_URL` and `IMAGE_MODEL`.
+- **“The image service could not be reached”** — For self-hosting, confirm the local image server is running and reachable at `IMAGE_BASE_URL`, then retry one panel.
 - **“No selectable text was found”** — This PDF is likely scanned or image-only. Use a text-based PDF; OCR is not included.
 - **Lesson too long** — The current adaptation and audio-context limits are 60,000 extracted characters.
 - **Port already in use** — Stop the other app using port `5173` (Vite) or `8787` (development API), or free that port before starting the app.
@@ -189,4 +266,4 @@ When asked to set up or verify this repository, the agent should:
 
 ### Ready-to-use Desktop Agent request
 
-> Clone the `arena/d3183c99-adaptivelearn-ai` branch from `https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git`, read `Setup.md`, and handle first-time setup end-to-end. Do not overwrite an existing `.env`; if it is missing, copy `.env.example` but leave keys blank. Never ask me to paste credentials or print, screenshot, commit, or send any secret. Install dependencies; run `npm test`, `npm run lint`, and `npm run build`; start the web app; and verify the frontend, `/api/health`, `/api/audio/status`, the PDF upload/extraction flow, and the Original Lesson → AI Adaptation → Personalized Learning flow using a small text-based test PDF. Confirm that Audio selection itself does not start the microphone or read a prepared passage; it must show a one-to-one, lesson-grounded conversation UI with explicit start, mute, end, and transcript controls. If audio credentials are already configured privately, start `npm run dev:audio-agent` and perform a real audible question-and-answer test on this laptop, then test mute/unmute and end-call. If the LiveKit, Deepgram, or model values are missing, do not request them and do not claim live audio works; report only the missing variable names and let me configure them locally. Do not make live paid provider calls unless I explicitly request them. Also verify that saved preferences and the optional “Explain it like…” input reach lesson adaptation without changing lesson facts; the visual mode remains a structured diagram, not generated video. Verify the quiz still presents exactly five questions with four choices, two Easy, two Medium, one Hard, adaptive level changes, locked first answers, and practice retries excluded from scoring. Never expose or commit `.env`.
+> Clone the `arena/d3183c99-adaptivelearn-ai` branch from `https://github.com/SriAkhilSJ/AdaptiveLearn-AI.git`, read `Setup.md`, and handle first-time setup end-to-end. Do not overwrite an existing `.env`; if it is missing, copy `.env.example` but leave keys blank. Never ask me to paste credentials or print, screenshot, commit, or send any secret. Install dependencies; run `npm test`, `npm run lint`, and `npm run build`; start the web app; and verify the frontend, `/api/health`, `/api/audio/status`, the PDF upload/extraction flow, and the Original Lesson → AI Adaptation → Personalized Learning flow using a small text-based test PDF. Confirm that Audio selection itself does not start the microphone or read a prepared passage; it must show a one-to-one, lesson-grounded conversation UI with explicit start, mute, end, and transcript controls. If audio credentials are already configured privately, start `npm run dev:audio-agent` and perform a real audible question-and-answer test on this laptop, then test mute/unmute and end-call. If the LiveKit, Deepgram, or model values are missing, do not request them and do not claim live audio works; report only the missing variable names and let me configure them locally. Do not make live paid provider calls unless I explicitly request them. Also verify that saved preferences and the optional “Explain it like…” input reach lesson adaptation without changing lesson facts; Visual mode is a learner-controlled static comic storyboard (panels never auto-advance, illustrations generate only on request, and the overview diagram stays available under “Show overview diagram”), not generated video. Verify the quiz still presents exactly five questions with four choices, two Easy, two Medium, one Hard, adaptive level changes, locked first answers, and practice retries excluded from scoring. Never expose or commit `.env`.
